@@ -1,3 +1,3 @@
 function startHunt() {
-    alert("Treasure Hunt Started!");
+    window.location.href = "./login.html";
 }

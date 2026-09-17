@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Camera Check | Treasure Hunt</title>
+
+    <link
+        rel="stylesheet"
+        href="./auth.css?v=1"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="background-layer"></div>
+
+
+<main class="auth-wrapper">
+
+
+    <section class="parchment-card">
+
+
+        <p class="eyebrow">
+            DEVICE PREPARATION
+        </p>
+
+
+        <h1>
+            Camera Check
+        </h1>
+
+
+        <div
+            id="teamBadge"
+            class="team-badge"
+        >
+            Verifying team...
+        </div>
+
+
+        <p class="quote">
+            Your camera will become your key
+            to the hidden checkpoints.
+        </p>
+
+
+        <div class="divider">
+            <span>⌖</span>
+        </div>
+
+
+        <div
+            id="cameraStatus"
+            class="status-pill"
+        >
+            Camera not checked
+        </div>
+
+
+        <div class="camera-frame">
+
+            <video
+                id="cameraVideo"
+                autoplay
+                playsinline
+                muted
+                style="display:none;"
+            >
+            </video>
+
+
+            <div
+                id="cameraPlaceholder"
+                class="camera-placeholder"
+            >
+
+                Camera preview will
+                appear here.
+
+                <br><br>
+
+                Press
+                <strong>
+                    Check Camera
+                </strong>
+                below.
+
+            </div>
+
+        </div>
+
+
+        <button
+            id="checkCameraButton"
+            onclick="checkCamera()"
+        >
+            Check Camera
+        </button>
+
+
+        <button
+            id="continueButton"
+            class="secondary-button"
+            onclick="continueToWaiting()"
+            style="display:none;"
+        >
+            Camera Ready — Continue
+        </button>
+
+
+        <div
+            id="cameraMessage"
+            class="message"
+        ></div>
+
+
+    </section>
+
+
+</main>
+
+
+<script src="./camera.js?v=1"></script>
+
+</body>
+
+</html>
