@@ -7,162 +7,390 @@
 
     <title>Treasure Hunt Admin</title>
 
-    <link rel="stylesheet" href="./style.css?v=4">
-
-    <style>
-        .admin-container {
-            width: 95%;
-            max-width: 900px;
-            margin: 40px auto;
-        }
-
-        .admin-card {
-            background: #1f2937;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-        }
-
-        .admin-card h2 {
-            color: #fbbf24;
-            margin-bottom: 20px;
-        }
-
-        .admin-input {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 15px;
-            background: #111827;
-            color: white;
-            border: 1px solid #374151;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .admin-button {
-            width: 100%;
-            padding: 14px;
-            background: #f59e0b;
-            color: #111827;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .team-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            padding: 18px;
-            margin-top: 12px;
-
-            background: #111827;
-            border-radius: 10px;
-        }
-
-        .team-name {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .team-code {
-            color: #fbbf24;
-            font-family: monospace;
-            font-size: 16px;
-        }
-
-        .team-count {
-            color: #9ca3af;
-            margin-bottom: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="./admin.css?v=1">
 </head>
 
 <body>
 
-<div class="admin-container">
+<div id="loginScreen" class="login-screen">
 
-    <div class="admin-card">
-        <h1>🏴‍☠️ Treasure Hunt Control</h1>
-        <p>Administrator Panel</p>
-    </div>
+    <div class="login-card">
 
-    <div class="admin-card">
+        <div class="admin-symbol">⚔</div>
 
-        <h2>Administrator Login</h2>
+        <p class="small-title">
+            TREASURE HUNT
+        </p>
+
+        <h1>Admin Control</h1>
+
+        <p class="login-description">
+            Authorized event coordinators only.
+            Enter the administrator password to access the control room.
+        </p>
 
         <input
-            id="adminPassword"
-            class="admin-input"
             type="password"
-            placeholder="Admin Password"
+            id="adminPassword"
+            placeholder="Administrator Password"
         >
 
-        <button
-            class="admin-button"
-            onclick="unlockAdmin()"
-        >
-            Unlock Admin Panel
+        <button onclick="adminLogin()">
+            Enter Control Room
         </button>
 
-        <p id="loginMessage"></p>
-
-    </div>
-
-    <div id="adminPanel" style="display:none;">
-
-        <div class="admin-card">
-
-            <h2>Register Team</h2>
-
-            <input
-                id="teamName"
-                class="admin-input"
-                type="text"
-                placeholder="Team Name"
-            >
-
-            <input
-                id="loginCode"
-                class="admin-input"
-                type="text"
-                placeholder="Team Login Code"
-            >
-
-            <button
-                class="admin-button"
-                onclick="createTeam()"
-            >
-                Register Team
-            </button>
-
-            <p id="message"></p>
-
-        </div>
-
-        <div class="admin-card">
-
-            <h2>Registered Teams</h2>
-
-            <p
-                id="teamCount"
-                class="team-count"
-            >
-                0 / 4 Teams
-            </p>
-
-            <div id="teamList"></div>
-
-        </div>
+        <p id="loginMessage" class="message"></p>
 
     </div>
 
 </div>
 
-<script src="./admin.js?v=2"></script>
+
+<div id="dashboard" class="dashboard hidden">
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <span>☠</span>
+
+            <div>
+                <strong>Treasure Hunt</strong>
+                <small>Control Room</small>
+            </div>
+        </div>
+
+
+        <nav>
+
+            <button
+                class="nav-button active"
+                onclick="showSection('overview', this)"
+            >
+                🏠 Overview
+            </button>
+
+            <button
+                class="nav-button"
+                onclick="showSection('teams', this)"
+            >
+                👥 Manage Teams
+            </button>
+
+            <button
+                class="nav-button"
+                onclick="showSection('event', this)"
+            >
+                ⚡ Event Control
+            </button>
+
+            <button
+                class="nav-button"
+                onclick="showSection('progress', this)"
+            >
+                🧭 Live Progress
+            </button>
+
+            <button
+                class="nav-button"
+                onclick="showSection('results', this)"
+            >
+                🏆 Results
+            </button>
+
+        </nav>
+
+
+        <button
+            class="logout-button"
+            onclick="adminLogout()"
+        >
+            Logout
+        </button>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <h2 id="pageTitle">Overview</h2>
+
+                <p>
+                    Treasure Hunt administration and monitoring
+                </p>
+            </div>
+
+            <div class="admin-badge">
+                ADMIN
+            </div>
+
+        </header>
+
+
+        <!-- OVERVIEW -->
+
+        <section id="overviewSection" class="section">
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <span>👥</span>
+                    <div>
+                        <small>Registered Teams</small>
+                        <h3 id="overviewTeams">0 / 4</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <span>⚡</span>
+                    <div>
+                        <small>Event Status</small>
+                        <h3 id="overviewStatus">Waiting</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <span>🏁</span>
+                    <div>
+                        <small>Teams Finished</small>
+                        <h3 id="overviewFinished">0</h3>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>Control Center</h3>
+
+                <p class="panel-description">
+                    Select an area below to manage the event.
+                </p>
+
+
+                <div class="action-grid">
+
+                    <button
+                        class="action-card"
+                        onclick="openSection('teams')"
+                    >
+                        <span>👥</span>
+                        <strong>Manage Teams</strong>
+                        <small>
+                            Add, remove, or reset team login sessions
+                        </small>
+                    </button>
+
+
+                    <button
+                        class="action-card"
+                        onclick="openSection('event')"
+                    >
+                        <span>⚡</span>
+                        <strong>Event Control</strong>
+                        <small>
+                            Start or monitor the treasure hunt
+                        </small>
+                    </button>
+
+
+                    <button
+                        class="action-card"
+                        onclick="openSection('progress')"
+                    >
+                        <span>🧭</span>
+                        <strong>Live Progress</strong>
+                        <small>
+                            Track checkpoints and completion times
+                        </small>
+                    </button>
+
+
+                    <button
+                        class="action-card"
+                        onclick="openSection('results')"
+                    >
+                        <span>🏆</span>
+                        <strong>Results</strong>
+                        <small>
+                            View winner and runner-up
+                        </small>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TEAM MANAGEMENT -->
+
+        <section
+            id="teamsSection"
+            class="section hidden"
+        >
+
+            <div class="panel">
+
+                <div class="section-header">
+
+                    <div>
+                        <h3>Team Management</h3>
+
+                        <p>
+                            Register up to four teams.
+                            Each team receives a unique login code.
+                        </p>
+                    </div>
+
+                    <div
+                        id="teamCount"
+                        class="counter"
+                    >
+                        0 / 4
+                    </div>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <input
+                        id="teamName"
+                        type="text"
+                        placeholder="Team Name"
+                    >
+
+                    <input
+                        id="loginCode"
+                        type="text"
+                        placeholder="Team Login Code"
+                    >
+
+                    <button
+                        class="primary-button"
+                        onclick="createTeam()"
+                    >
+                        + Register Team
+                    </button>
+
+                </div>
+
+                <p id="teamMessage" class="message"></p>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>Registered Teams</h3>
+
+                <p class="panel-description">
+                    Reset Login is useful if a team leader loses
+                    their browser session. Their checkpoint progress
+                    will not be deleted.
+                </p>
+
+                <div id="teamList"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- EVENT -->
+
+        <section
+            id="eventSection"
+            class="section hidden"
+        >
+
+            <div class="panel">
+
+                <h3>Event Control</h3>
+
+                <p class="panel-description">
+                    The event will eventually start simultaneously
+                    for all four teams from this screen.
+                </p>
+
+                <div class="event-status-box">
+
+                    <span>Current Status</span>
+
+                    <strong id="eventStatus">
+                        WAITING
+                    </strong>
+
+                </div>
+
+                <button
+                    class="start-event-button"
+                    disabled
+                >
+                    Start Event
+                </button>
+
+                <small>
+                    We will activate this in the next stage.
+                </small>
+
+            </div>
+
+        </section>
+
+
+        <!-- LIVE PROGRESS -->
+
+        <section
+            id="progressSection"
+            class="section hidden"
+        >
+
+            <div class="panel">
+
+                <h3>Live Team Progress</h3>
+
+                <p>
+                    Checkpoint monitoring will appear here once
+                    we connect the QR scanning system.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- RESULTS -->
+
+        <section
+            id="resultsSection"
+            class="section hidden"
+        >
+
+            <div class="panel">
+
+                <h3>Event Results</h3>
+
+                <p>
+                    Winner and runner-up will appear here after
+                    teams scan the final QR.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="./admin.js?v=5"></script>
 
 </body>
 
