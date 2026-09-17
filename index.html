@@ -1,18 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Treasure Hunt</title>
+
+    <link rel="stylesheet" href="./style.css?v=2">
 </head>
 
 <body>
 
-    <h1>🏴‍☠️ Treasure Hunt</h1>
+    <div class="page">
 
-    <p>Welcome to the Treasure Hunt!</p>
+        <div class="card">
 
-    <button onclick="startGame()">Start Hunt</button>
+            <div class="icon">
+                🏴‍☠️
+            </div>
 
-    <script src="app.js"></script>
+            <h1>Treasure Hunt</h1>
+
+            <p class="subtitle">
+                Welcome to the Treasure Hunt!
+            </p>
+
+            <div class="info-box">
+                <p>
+                    Follow the clues, scan the QR codes,
+                    complete every checkpoint, and reach the final treasure.
+                </p>
+            </div>
+
+            <button onclick="startHunt()">
+                Start Hunt
+            </button>
+
+            <p class="footer-text">
+                Adventure starts here.
+            </p>
+
+        </div>
+
+    </div>
+
+    <script src="./app.js"></script>
 
 </body>
+
 </html>

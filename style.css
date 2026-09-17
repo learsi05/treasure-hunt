@@ -1,26 +1,150 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: white;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    height: 100vh;
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.container {
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    min-height: 100vh;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a,
+            #111827,
+            #1e293b
+        );
+
+    color: white;
+}
+
+.page {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 500px;
+
+    background: rgba(31, 41, 55, 0.95);
+
+    padding: 45px 35px;
+
+    border-radius: 20px;
+
     text-align: center;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.45);
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.icon {
+    font-size: 60px;
+
+    margin-bottom: 15px;
+}
+
+h1 {
+    font-size: 42px;
+
+    margin-bottom: 12px;
+
+    color: #fbbf24;
+}
+
+.subtitle {
+    font-size: 20px;
+
+    color: #e5e7eb;
+
+    margin-bottom: 30px;
+}
+
+.info-box {
+    background: #111827;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    margin-bottom: 30px;
+
+    line-height: 1.6;
+
+    color: #d1d5db;
+
+    border-left: 4px solid #f59e0b;
 }
 
 button {
-    padding: 15px 30px;
+    width: 100%;
+
+    padding: 15px;
+
     font-size: 18px;
+    font-weight: bold;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #f59e0b;
+
+    color: #111827;
 
     cursor: pointer;
 
-    border: none;
-    border-radius: 8px;
+    transition: 0.25s;
+}
+
+button:hover {
+    background: #fbbf24;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(245, 158, 11, 0.3);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.footer-text {
+    margin-top: 25px;
+
+    font-size: 14px;
+
+    color: #9ca3af;
+}
+
+/* Mobile optimization */
+
+@media (max-width: 600px) {
+
+    .card {
+        padding: 35px 22px;
+    }
+
+    h1 {
+        font-size: 34px;
+    }
+
+    .subtitle {
+        font-size: 17px;
+    }
+
+    .icon {
+        font-size: 50px;
+    }
 }
