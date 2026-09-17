@@ -4,41 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Treasure Hunt</title>
-
-    <link rel="stylesheet" href="./style.css?v=2">
+    <link rel="stylesheet" href="./style.css?v=5">
 </head>
 
 <body>
 
-    <div class="page">
+    <div class="page-wrapper">
 
-        <div class="card">
+        <div class="map-overlay"></div>
 
-            <div class="icon">
-                🏴‍☠️
+        <div class="main-card">
+
+            <div class="corner corner-top-left">✦</div>
+            <div class="corner corner-top-right">✦</div>
+            <div class="corner corner-bottom-left">✦</div>
+            <div class="corner corner-bottom-right">✦</div>
+
+            <p class="small-heading">MIT Campus Adventure</p>
+
+            <h1 class="title">
+                Treasure Hunt
+            </h1>
+
+            <p class="tagline">
+                “Not all who wander are astray... some are seeking treasure.”
+            </p>
+
+            <div class="divider">
+                <span>☠</span>
             </div>
 
-            <h1>Treasure Hunt</h1>
-
-            <p class="subtitle">
-                Welcome to the Treasure Hunt!
+            <p class="description">
+                A mysterious trail of clues, hidden checkpoints, and a final secret awaits.
+                Gather your courage, trust your instincts, and uncover the treasure before
+                the others do.
             </p>
 
             <div class="info-box">
+                <p><strong>For Team Leaders:</strong></p>
                 <p>
-                    Follow the clues, scan the QR codes,
-                    complete every checkpoint, and reach the final treasure.
+                    Login from your device, verify your camera, scan the assigned QR codes,
+                    complete all checkpoints, and race toward the final treasure.
                 </p>
             </div>
 
-            <button onclick="startHunt()">
-                Start Hunt
+            <button class="hunt-button" onclick="startHunt()">
+                Begin the Quest
             </button>
 
-            <p class="footer-text">
-                Adventure starts here.
+            <p class="footer-note">
+                Team login and hunt access will begin from here.
             </p>
 
         </div>

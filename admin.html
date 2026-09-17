@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Treasure Hunt Admin</title>
+
+    <link rel="stylesheet" href="./style.css?v=4">
+
+    <style>
+        .admin-container {
+            width: 95%;
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .admin-card {
+            background: #1f2937;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+
+        .admin-card h2 {
+            color: #fbbf24;
+            margin-bottom: 20px;
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            background: #111827;
+            color: white;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .admin-button {
+            width: 100%;
+            padding: 14px;
+            background: #f59e0b;
+            color: #111827;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .team-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 18px;
+            margin-top: 12px;
+
+            background: #111827;
+            border-radius: 10px;
+        }
+
+        .team-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .team-code {
+            color: #fbbf24;
+            font-family: monospace;
+            font-size: 16px;
+        }
+
+        .team-count {
+            color: #9ca3af;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="admin-container">
+
+    <div class="admin-card">
+        <h1>🏴‍☠️ Treasure Hunt Control</h1>
+        <p>Administrator Panel</p>
+    </div>
+
+    <div class="admin-card">
+
+        <h2>Administrator Login</h2>
+
+        <input
+            id="adminPassword"
+            class="admin-input"
+            type="password"
+            placeholder="Admin Password"
+        >
+
+        <button
+            class="admin-button"
+            onclick="unlockAdmin()"
+        >
+            Unlock Admin Panel
+        </button>
+
+        <p id="loginMessage"></p>
+
+    </div>
+
+    <div id="adminPanel" style="display:none;">
+
+        <div class="admin-card">
+
+            <h2>Register Team</h2>
+
+            <input
+                id="teamName"
+                class="admin-input"
+                type="text"
+                placeholder="Team Name"
+            >
+
+            <input
+                id="loginCode"
+                class="admin-input"
+                type="text"
+                placeholder="Team Login Code"
+            >
+
+            <button
+                class="admin-button"
+                onclick="createTeam()"
+            >
+                Register Team
+            </button>
+
+            <p id="message"></p>
+
+        </div>
+
+        <div class="admin-card">
+
+            <h2>Registered Teams</h2>
+
+            <p
+                id="teamCount"
+                class="team-count"
+            >
+                0 / 4 Teams
+            </p>
+
+            <div id="teamList"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="./admin.js?v=2"></script>
+
+</body>
+
+</html>
