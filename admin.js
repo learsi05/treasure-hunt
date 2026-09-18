@@ -137,6 +137,7 @@ function showDashboard() {
             2000
         );
     }
+    loadFinalQR();
 }
 
 
@@ -1245,17 +1246,131 @@ function renderRouteEditor(teamId) {
             "checkpointEditors"
         );
 
+
     container.innerHTML = "";
 
 
+    const stageInfo = {
+
+        1: {
+            title:
+                "Starting QR",
+
+            icon:
+                "🚪",
+
+            description:
+                "This QR is hidden in the starting room. " +
+                "The team must first find its own QR.",
+
+            clueTitle:
+                "Clue revealed after START QR",
+
+            clueHelp:
+                "This clue should guide the team to Checkpoint 1.",
+
+            saveText:
+                "Save Starting Stage"
+        },
+
+
+        2: {
+            title:
+                "Checkpoint 1 QR",
+
+            icon:
+                "📍",
+
+            description:
+                "This QR is found using the clue revealed by the Starting QR.",
+
+            clueTitle:
+                "Clue revealed after Checkpoint 1",
+
+            clueHelp:
+                "This clue should guide the team to Checkpoint 2.",
+
+            saveText:
+                "Save Checkpoint 1"
+        },
+
+
+        3: {
+            title:
+                "Checkpoint 2 QR",
+
+            icon:
+                "📍",
+
+            description:
+                "This is the team's unique Checkpoint 2 QR.",
+
+            clueTitle:
+                "Clue revealed after Checkpoint 2",
+
+            clueHelp:
+                "This clue should guide the team to Checkpoint 3.",
+
+            saveText:
+                "Save Checkpoint 2"
+        },
+
+
+        4: {
+            title:
+                "Checkpoint 3 QR",
+
+            icon:
+                "📍",
+
+            description:
+                "This is the team's unique Checkpoint 3 QR.",
+
+            clueTitle:
+                "Clue revealed after Checkpoint 3",
+
+            clueHelp:
+                "This clue should guide the team to Checkpoint 4.",
+
+            saveText:
+                "Save Checkpoint 3"
+        },
+
+
+        5: {
+            title:
+                "Checkpoint 4 QR",
+
+            icon:
+                "📍",
+
+            description:
+                "This is the final team-specific QR.",
+
+            clueTitle:
+                "FINAL clue revealed after Checkpoint 4",
+
+            clueHelp:
+                "This clue should guide the team to the common Checkpoint 5 / treasure QR.",
+
+            saveText:
+                "Save Checkpoint 4"
+        }
+    };
+
+
     for (
-        let cp = 1;
-        cp <= 5;
-        cp++
+        let stage = 1;
+        stage <= 5;
+        stage++
     ) {
 
+        const info =
+            stageInfo[stage];
+
+
         const saved =
-            routeData[cp] || {};
+            routeData[stage] || {};
 
 
         const configured =
@@ -1280,8 +1395,10 @@ function renderRouteEditor(teamId) {
             <div class="checkpoint-title-row">
 
                 <h3>
-                    Checkpoint ${cp}
+                    ${info.icon}
+                    ${info.title}
                 </h3>
+
 
                 <span
                     class="
@@ -1302,48 +1419,47 @@ function renderRouteEditor(teamId) {
 
 
             <p class="checkpoint-help">
-
-                The clue below leads this team to
-                this checkpoint. The QR uploaded here
-                is the only QR accepted at this stage.
-
+                ${info.description}
             </p>
 
 
             <div class="checkpoint-grid">
 
 
-                <!-- QR -->
-
                 <div class="qr-config-panel">
 
                     <div class="config-label">
-                        📷 Assigned QR Code
+                        📷 QR physically placed here
                     </div>
 
+
                     <div class="config-help">
-                        Upload the exact QR that will
-                        physically be placed at this location.
+
+                        Upload the exact QR image that
+                        the team must scan at this stage.
+
                     </div>
 
 
                     <div class="qr-drop-zone">
 
                         <img
-                            id="qrPreview${cp}"
+                            id="qrPreview${stage}"
                             class="qr-preview"
                         >
 
 
                         <input
                             type="file"
+
                             accept="image/*"
+
                             class="qr-file-input"
 
                             onchange="
                                 decodeUploadedQR(
                                     event,
-                                    ${cp}
+                                    ${stage}
                                 )
                             "
                         >
@@ -1354,11 +1470,12 @@ function renderRouteEditor(teamId) {
                     <div class="decoded-wrapper">
 
                         <span class="decoded-label">
-                            Decoded QR Value
+                            QR VALUE STORED BY SERVER
                         </span>
 
+
                         <div
-                            id="qrValue${cp}"
+                            id="qrValue${stage}"
                             class="qr-value"
                         >
 
@@ -1369,7 +1486,7 @@ function renderRouteEditor(teamId) {
                                         saved.qr_code
                                     )
                                     :
-                                    "Upload a QR to decode it"
+                                    "Upload a QR image"
                             }
 
                         </div>
@@ -1378,7 +1495,8 @@ function renderRouteEditor(teamId) {
 
 
                     <input
-                        id="qrManual${cp}"
+                        id="qrManual${stage}"
+
                         class="qr-manual-input"
 
                         type="text"
@@ -1393,38 +1511,30 @@ function renderRouteEditor(teamId) {
                                 ""
                         }"
 
-                        placeholder="
-                            QR value appears here
-                        "
+                        placeholder="Decoded QR value"
                     >
 
                 </div>
 
 
-                <!-- CLUE -->
-
                 <div class="clue-config-panel">
 
                     <div class="config-label">
-                        🧭 Clue Shown to Team
+                        🧭 ${info.clueTitle}
                     </div>
 
+
                     <div class="config-help">
-
-                        This clue is shown BEFORE
-                        Checkpoint ${cp} is scanned.
-
-                        It should guide the team toward
-                        the location of this QR.
-
+                        ${info.clueHelp}
                     </div>
 
 
                     <textarea
-                        id="clue${cp}"
+                        id="clue${stage}"
+
                         class="route-textarea"
 
-                        placeholder="Example: Where money sleeps behind glass, seek your next mark..."
+                        placeholder="Enter the clue that appears after this QR is scanned..."
                     >${
                         saved.clue
                             ?
@@ -1447,12 +1557,12 @@ function renderRouteEditor(teamId) {
                 onclick="
                     saveCheckpoint(
                         ${teamId},
-                        ${cp}
+                        ${stage}
                     )
                 "
             >
 
-                Save Checkpoint ${cp}
+                ${info.saveText}
 
             </button>
 
@@ -1680,4 +1790,256 @@ async function saveCheckpoint(
 
 
     await loadTeamRoute();
+}
+async function loadFinalQR() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin-final",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+            return;
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (
+            result.finalQrCode
+        ) {
+
+            document
+                .getElementById(
+                    "finalQrValue"
+                )
+                .innerText =
+                    result.finalQrCode;
+
+
+            document
+                .getElementById(
+                    "finalQrManual"
+                )
+                .value =
+                    result.finalQrCode;
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+    }
+}
+function decodeFinalQR(event) {
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file) {
+        return;
+    }
+
+
+    const image =
+        new Image();
+
+
+    const preview =
+        document.getElementById(
+            "finalQrPreview"
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            file
+        );
+
+
+    preview.src =
+        url;
+
+
+    preview.style.display =
+        "block";
+
+
+    image.onload =
+        () => {
+
+            const canvas =
+                document
+                    .createElement(
+                        "canvas"
+                    );
+
+
+            const context =
+                canvas
+                    .getContext(
+                        "2d"
+                    );
+
+
+            canvas.width =
+                image.width;
+
+
+            canvas.height =
+                image.height;
+
+
+            context.drawImage(
+                image,
+                0,
+                0
+            );
+
+
+            const imageData =
+                context.getImageData(
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+
+
+            const qr =
+                jsQR(
+                    imageData.data,
+                    canvas.width,
+                    canvas.height
+                );
+
+
+            if (!qr) {
+
+                document
+                    .getElementById(
+                        "finalQrValue"
+                    )
+                    .innerText =
+                        "QR could not be detected.";
+
+                return;
+            }
+
+
+            document
+                .getElementById(
+                    "finalQrValue"
+                )
+                .innerText =
+                    qr.data;
+
+
+            document
+                .getElementById(
+                    "finalQrManual"
+                )
+                .value =
+                    qr.data;
+        };
+
+
+    image.src =
+        url;
+}
+async function saveFinalQR() {
+
+    const value =
+        document
+            .getElementById(
+                "finalQrManual"
+            )
+            .value
+            .trim();
+
+
+    const message =
+        document
+            .getElementById(
+                "finalQrMessage"
+            );
+
+
+    if (!value) {
+
+        message.className =
+            "message error";
+
+
+        message.innerText =
+            "Upload or enter the final QR first.";
+
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            "/api/admin-final",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+                        finalQrCode:
+                            value
+                    })
+
+            }
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        message.className =
+            "message error";
+
+
+        message.innerText =
+            result.message;
+
+        return;
+    }
+
+
+    message.className =
+        "message success";
+
+
+    message.innerText =
+        "✓ Common Checkpoint 5 QR saved.";
+
+
+    document
+        .getElementById(
+            "finalQrValue"
+        )
+        .innerText =
+            value;
 }

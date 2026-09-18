@@ -305,8 +305,9 @@
             </div>
 
         </section>
-<!-- ROUTE AND QR SETUP -->
-<!-- ROUTE & QR SETUP -->
+<!-- =====================================================
+     ROUTE & QR SETUP
+===================================================== -->
 
 <section
     id="routesSection"
@@ -316,30 +317,39 @@
     <div class="route-hero">
 
         <div>
+
             <div class="route-kicker">
                 🗺 ROUTE CONFIGURATION
             </div>
 
-            <h2>Route & QR Setup</h2>
+            <h2>
+                Route & QR Setup
+            </h2>
 
             <p>
-                Configure the five checkpoints for each team.
-                Each checkpoint requires one QR code and one clue.
+                Configure each team's starting QR and four
+                route checkpoints.
             </p>
+
         </div>
+
 
         <div class="route-guide">
 
-            <strong>How it works</strong>
+            <strong>
+                Hunt Flow
+            </strong>
 
             <span>
-                Clue → Find QR → Scan → Next Clue
+                START QR → CP1 → CP2 → CP3 → CP4 → COMMON CP5
             </span>
 
         </div>
 
     </div>
 
+
+    <!-- TEAM SELECT -->
 
     <div class="route-team-panel">
 
@@ -362,18 +372,24 @@
 
         </div>
 
+
         <div class="route-team-info">
 
-            <span class="info-icon">ⓘ</span>
+            <span class="info-icon">
+                ⓘ
+            </span>
 
-            QR codes assigned here are the
-            exact QR codes that this team's
-            phone must scan during the hunt.
+            Every team has its own Start QR and
+            Checkpoints 1–4.
+
+            Checkpoint 5 is shared by all teams.
 
         </div>
 
     </div>
 
+
+    <!-- TEAM ROUTE -->
 
     <div
         id="routeEditor"
@@ -381,6 +397,13 @@
     >
 
         <div class="route-progress">
+
+            <div class="route-step">
+                <span>S</span>
+                <small>START</small>
+            </div>
+
+            <div class="route-line"></div>
 
             <div class="route-step">
                 <span>1</span>
@@ -410,8 +433,8 @@
 
             <div class="route-line"></div>
 
-            <div class="route-step">
-                <span>5</span>
+            <div class="route-step final-step">
+                <span>🏁</span>
                 <small>CP5</small>
             </div>
 
@@ -424,6 +447,142 @@
         <p
             id="routeMessage"
             class="message route-message"
+        ></p>
+
+    </div>
+
+
+    <!-- COMMON FINAL QR -->
+
+    <div class="final-qr-card">
+
+        <div class="final-header">
+
+            <div>
+
+                <div class="route-kicker">
+                    🏁 COMMON FINAL CHECKPOINT
+                </div>
+
+                <h2>
+                    Checkpoint 5
+                </h2>
+
+            </div>
+
+            <span class="common-badge">
+                ALL TEAMS
+            </span>
+
+        </div>
+
+
+        <p class="final-description">
+
+            This is the 21st QR.
+
+            All teams eventually reach this same QR.
+            A team can finish only after completing its
+            Start QR and Checkpoints 1–4.
+
+        </p>
+
+
+        <div class="final-grid">
+
+            <div class="qr-config-panel">
+
+                <div class="config-label">
+                    📷 Common Final QR
+                </div>
+
+                <div class="config-help">
+                    Upload the QR that will physically
+                    be placed at the treasure/final location.
+                </div>
+
+
+                <div class="qr-drop-zone">
+
+                    <img
+                        id="finalQrPreview"
+                        class="qr-preview"
+                    >
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        class="qr-file-input"
+                        onchange="decodeFinalQR(event)"
+                    >
+
+                </div>
+
+
+                <div class="decoded-wrapper">
+
+                    <span class="decoded-label">
+                        Decoded QR Value
+                    </span>
+
+                    <div
+                        id="finalQrValue"
+                        class="qr-value"
+                    >
+                        No final QR configured
+                    </div>
+
+                </div>
+
+
+                <input
+                    id="finalQrManual"
+                    class="qr-manual-input"
+                    type="text"
+                    placeholder="Final QR value"
+                >
+
+            </div>
+
+
+            <div class="final-explanation">
+
+                <h3>
+                    How CP5 works
+                </h3>
+
+                <p>
+                    After a team's Checkpoint 4 QR is
+                    successfully scanned, its final clue
+                    will be revealed.
+                </p>
+
+                <p>
+                    The team follows that clue and races
+                    toward this common QR.
+                </p>
+
+                <p>
+                    The server accepts the QR only if that
+                    team has completed its entire route.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="save-final-button"
+            onclick="saveFinalQR()"
+        >
+            Save Common Checkpoint 5 QR
+        </button>
+
+
+        <p
+            id="finalQrMessage"
+            class="message"
         ></p>
 
     </div>

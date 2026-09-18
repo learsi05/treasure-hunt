@@ -2,12 +2,12 @@ let qrScanner = null;
 
 let processingQR = false;
 
-let currentCheckpoint = 1;
+let currentStage = 1;
 
 
-/* ==========================
-   LOAD HUNT
-========================== */
+/* =====================================================
+   LOAD CURRENT HUNT STATE
+===================================================== */
 
 async function loadHunt() {
 
@@ -61,17 +61,18 @@ async function loadHunt() {
         }
 
 
-        if (result.finalStage) {
+        if (result.finished) {
 
-            document
-                .getElementById(
-                    "clueText"
-                )
-                .innerText =
-                    "All five checkpoints are complete. Final stage coming next.";
+            window.location.replace(
+                "./finished.html"
+            );
 
             return;
         }
+
+
+        currentStage =
+            result.team.currentStage;
 
 
         document
@@ -82,16 +83,20 @@ async function loadHunt() {
                 result.team.name;
 
 
-        currentCheckpoint =
-            result.team.currentCheckpoint;
+        document
+            .getElementById(
+                "stageLabel"
+            )
+            .innerText =
+                result.stageLabel;
 
 
         document
             .getElementById(
-                "checkpointNumber"
+                "clueTitle"
             )
             .innerText =
-                currentCheckpoint;
+                result.clueTitle;
 
 
         document
@@ -102,19 +107,26 @@ async function loadHunt() {
                 result.clue;
 
 
+        document
+            .getElementById(
+                "scanButton"
+            )
+            .innerText =
+                `📷 ${result.scanButton}`;
+
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
     }
 }
 
 
-loadHunt();
-
-
-/* ==========================
-   OPEN SCANNER
-========================== */
+/* =====================================================
+   CAMERA
+===================================================== */
 
 async function openScanner() {
 
@@ -142,7 +154,16 @@ async function openScanner() {
         .remove("hidden");
 
 
-    processingQR = false;
+    processingQR =
+        false;
+
+
+    document
+        .getElementById(
+            "scannerStatus"
+        )
+        .innerText =
+            "Point your camera at the QR code.";
 
 
     qrScanner =
@@ -161,11 +182,15 @@ async function openScanner() {
             },
 
             {
-                fps: 10,
+                fps:
+                    10,
 
                 qrbox: {
-                    width: 240,
-                    height: 240
+                    width:
+                        240,
+
+                    height:
+                        240
                 }
             },
 
@@ -177,7 +202,9 @@ async function openScanner() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
 
 
         document
@@ -190,9 +217,9 @@ async function openScanner() {
 }
 
 
-/* ==========================
-   QR FOUND
-========================== */
+/* =====================================================
+   QR DETECTED
+===================================================== */
 
 async function onQRDetected(
     decodedText
@@ -225,7 +252,8 @@ async function onQRDetected(
                 "/api/scan-qr",
                 {
 
-                    method: "POST",
+                    method:
+                        "POST",
 
                     headers: {
                         "Content-Type":
@@ -249,7 +277,17 @@ async function onQRDetected(
         if (!response.ok) {
 
             showWrongQR(
-                result.message
+                result
+            );
+
+            return;
+        }
+
+
+        if (result.finished) {
+
+            window.location.replace(
+                "./finished.html"
             );
 
             return;
@@ -263,19 +301,22 @@ async function onQRDetected(
 
     } catch (error) {
 
-        console.error(error);
-
-
-        showWrongQR(
-            "Connection error. Try again."
+        console.error(
+            error
         );
+
+
+        showWrongQR({
+            message:
+                "Connection error. Please try again."
+        });
     }
 }
 
 
-/* ==========================
-   VALID QR
-========================== */
+/* =====================================================
+   CORRECT QR
+===================================================== */
 
 function showCheckpointSuccess(
     result
@@ -310,7 +351,7 @@ function showCheckpointSuccess(
             "resultTitle"
         )
         .innerText =
-            `Checkpoint ${result.completedCheckpoint} Complete`;
+            `${result.completedLabel} Complete`;
 
 
     document
@@ -318,7 +359,11 @@ function showCheckpointSuccess(
             "resultMessage"
         )
         .innerText =
-            "The mark is valid. Your path continues.";
+            result.finalStage
+                ?
+                "Your team-specific route is complete. The final checkpoint is now unlocked."
+                :
+                "Correct QR. Your next clue has been revealed.";
 
 
     document
@@ -326,35 +371,30 @@ function showCheckpointSuccess(
             "nextClue"
         )
         .innerText =
-            result.nextClue;
+            result.revealedClue;
 
 
     const button =
-        document.getElementById(
-            "scanNextButton"
-        );
+        document
+            .getElementById(
+                "scanNextButton"
+            );
 
 
-    if (
+    button.innerText =
         result.finalStage
-    ) {
-
-        button.innerText =
-            "Continue to Final Stage";
-
-    } else {
-
-        button.innerText =
-            "Scan Next";
-    }
+            ?
+            "Continue to Final Checkpoint"
+            :
+            "Continue";
 }
 
 
-/* ==========================
+/* =====================================================
    WRONG QR
-========================== */
+===================================================== */
 
-function showWrongQR(message) {
+function showWrongQR(result) {
 
     document
         .getElementById(
@@ -380,12 +420,46 @@ function showWrongQR(message) {
             "✕";
 
 
+    let title =
+        "Wrong Path";
+
+
+    if (
+        result.code ===
+        "FUTURE_CHECKPOINT"
+    ) {
+
+        title =
+            "Checkpoint Locked";
+    }
+
+
+    if (
+        result.code ===
+        "FINAL_LOCKED"
+    ) {
+
+        title =
+            "Final Checkpoint Locked";
+    }
+
+
+    if (
+        result.code ===
+        "OLD_CHECKPOINT"
+    ) {
+
+        title =
+            "Already Completed";
+    }
+
+
     document
         .getElementById(
             "resultTitle"
         )
         .innerText =
-            "Wrong Path";
+            title;
 
 
     document
@@ -393,7 +467,7 @@ function showWrongQR(message) {
             "resultMessage"
         )
         .innerText =
-            message;
+            result.message;
 
 
     document
@@ -401,23 +475,21 @@ function showWrongQR(message) {
             "nextClue"
         )
         .innerText =
-            "Return to your current clue and keep searching.";
+            "Return to your current objective and continue searching.";
 
 
-    const button =
-        document.getElementById(
+    document
+        .getElementById(
             "scanNextButton"
-        );
-
-
-    button.innerText =
-        "Try Again";
+        )
+        .innerText =
+            "Try Again";
 }
 
 
-/* ==========================
+/* =====================================================
    CONTINUE
-========================== */
+===================================================== */
 
 async function continueHunt() {
 
@@ -441,9 +513,9 @@ async function continueHunt() {
 }
 
 
-/* ==========================
-   CLOSE SCANNER
-========================== */
+/* =====================================================
+   STOP CAMERA
+===================================================== */
 
 async function closeScanner() {
 
@@ -482,57 +554,99 @@ async function stopScanner() {
 
     } catch (error) {
 
-        // Scanner may already
-        // have stopped.
+        // Already stopped.
     }
 
 
-    qrScanner = null;
+    qrScanner =
+        null;
 }
 
 
-/* ==========================
-   EVENT RESET CHECK
-========================== */
+/* =====================================================
+   EVENT RESET / SESSION CHECK
+===================================================== */
 
-setInterval(
-    async () => {
+async function checkSessionState() {
 
-        if (processingQR) {
+    if (processingQR) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/team-session",
+                {
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        if (
+            response.status ===
+            401
+        ) {
+
+            await stopScanner();
+
+
+            window.location.replace(
+                "./login.html"
+            );
+
             return;
         }
 
 
-        try {
-
-            const response =
-                await fetch(
-                    "/api/team-session",
-                    {
-                        cache:
-                            "no-store"
-                    }
-                );
+        const result =
+            await response.json();
 
 
-            if (
-                response.status ===
-                401
-            ) {
+        if (
+            result.event &&
+            result.event.status !==
+            "running"
+        ) {
 
-                await stopScanner();
-
-
-                window.location.replace(
-                    "./login.html"
-                );
-            }
+            await stopScanner();
 
 
-        } catch (error) {
-            // Retry next interval
+            window.location.replace(
+                "./waiting.html"
+            );
         }
 
-    },
+
+    } catch (error) {
+
+        // Try again later.
+    }
+}
+
+
+loadHunt();
+
+
+setInterval(
+    checkSessionState,
     2500
+);
+
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+
+            checkSessionState();
+        }
+    }
 );

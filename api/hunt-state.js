@@ -12,18 +12,28 @@ const supabase =
     );
 
 
-function getCookie(req, name) {
+function getCookie(
+    req,
+    name
+) {
 
     const header =
         req.headers.cookie || "";
 
-    for (const cookie of header.split(";")) {
+
+    for (
+        const cookie
+        of header.split(";")
+    ) {
 
         const [
             key,
             ...values
         ] =
-            cookie.trim().split("=");
+            cookie
+                .trim()
+                .split("=");
+
 
         if (key === name) {
 
@@ -32,6 +42,7 @@ function getCookie(req, name) {
             );
         }
     }
+
 
     return null;
 }
@@ -47,7 +58,10 @@ function hashToken(token) {
 
 
 module.exports =
-async function handler(req, res) {
+async function handler(
+    req,
+    res
+) {
 
     const token =
         getCookie(
@@ -58,51 +72,78 @@ async function handler(req, res) {
 
     if (!token) {
 
-        return res.status(401).json({
-            success: false
-        });
+        return res
+            .status(401)
+            .json({
+                success: false
+            });
     }
 
 
-    const hash =
+    const tokenHash =
         hashToken(token);
 
 
     const {
         data: team
-    } = await supabase
-        .from("teams")
-        .select(`
-            id,
-            team_name,
-            current_checkpoint,
-            finished_at
-        `)
-        .eq(
-            "active_session_token",
-            hash
-        )
-        .maybeSingle();
+    } =
+        await supabase
+            .from("teams")
+            .select(`
+                id,
+                team_name,
+                current_checkpoint,
+                finished_at
+            `)
+            .eq(
+                "active_session_token",
+                tokenHash
+            )
+            .maybeSingle();
 
 
     if (!team) {
 
-        return res.status(401).json({
-            success: false
-        });
+        return res
+            .status(401)
+            .json({
+                success: false
+            });
+    }
+
+
+    if (team.finished_at) {
+
+        return res
+            .status(200)
+            .json({
+                success: true,
+                finished: true,
+
+                team: {
+                    name:
+                        team.team_name
+                }
+            });
     }
 
 
     const {
         data: event
-    } = await supabase
-        .from("event_config")
-        .select(`
-            status,
-            started_at
-        `)
-        .eq("id", 1)
-        .single();
+    } =
+        await supabase
+            .from(
+                "event_config"
+            )
+            .select(`
+                status,
+                started_at
+            `)
+            .eq(
+                "id",
+                1
+            )
+            .single();
 
 
     if (
@@ -110,76 +151,191 @@ async function handler(req, res) {
         "running"
     ) {
 
-        return res.status(409).json({
-            success: false,
-            eventStatus:
-                event.status
-        });
+        return res
+            .status(409)
+            .json({
+                success: false,
+
+                eventStatus:
+                    event.status
+            });
     }
 
 
-    if (
-        team.current_checkpoint > 5
-    ) {
+    const stage =
+        team.current_checkpoint;
 
-        return res.status(200).json({
-            success: true,
 
-            team,
+    /*
+     * STAGE 1
+     *
+     * Before the team has scanned
+     * its Starting QR.
+     */
 
-            finalStage: true
-        });
+    if (stage === 1) {
+
+        return res
+            .status(200)
+            .json({
+
+                success: true,
+
+                finished: false,
+
+                team: {
+                    name:
+                        team.team_name,
+
+                    currentStage:
+                        1
+                },
+
+                stageLabel:
+                    "START",
+
+                clueTitle:
+                    "Starting Challenge",
+
+                clue:
+                    "Find the QR assigned to your team somewhere in this room.",
+
+                scanButton:
+                    "Scan Starting QR",
+
+                finalStage:
+                    false
+            });
     }
+
+
+    /*
+     * STAGES 2-6
+     *
+     * Display the clue revealed
+     * by the previous successful QR.
+     */
+
+    const previousStage =
+        stage - 1;
 
 
     const {
-        data: route
-    } = await supabase
-        .from("team_routes")
-        .select(`
-            checkpoint_number,
-            clue
-        `)
-        .eq(
-            "team_id",
-            team.id
-        )
-        .eq(
-            "checkpoint_number",
-            team.current_checkpoint
-        )
-        .single();
+        data: previousRoute
+    } =
+        await supabase
+            .from(
+                "team_routes"
+            )
+            .select(
+                "clue"
+            )
+            .eq(
+                "team_id",
+                team.id
+            )
+            .eq(
+                "checkpoint_number",
+                previousStage
+            )
+            .single();
 
 
-    if (!route) {
+    if (!previousRoute) {
 
-        return res.status(500).json({
-            success: false,
-            message:
-                "Checkpoint route is not configured."
-        });
+        return res
+            .status(500)
+            .json({
+                success: false,
+
+                message:
+                    "Route is not configured correctly."
+            });
     }
 
 
-    return res.status(200).json({
+    /*
+     * STAGE 6 = COMMON CP5
+     */
 
-        success: true,
+    if (stage === 6) {
 
-        team: {
-            id:
-                team.id,
+        return res
+            .status(200)
+            .json({
 
-            name:
-                team.team_name,
+                success: true,
 
-            currentCheckpoint:
-                team.current_checkpoint
-        },
+                finished: false,
 
-        clue:
-            route.clue,
+                team: {
+                    name:
+                        team.team_name,
 
-        finalStage:
-            false
-    });
+                    currentStage:
+                        6
+                },
+
+                stageLabel:
+                    "CP 5 / 5",
+
+                clueTitle:
+                    "Final Checkpoint",
+
+                clue:
+                    previousRoute.clue,
+
+                scanButton:
+                    "Scan Final QR",
+
+                finalStage:
+                    true
+            });
+    }
+
+
+    /*
+     * STAGES:
+     *
+     * 2 = CP1
+     * 3 = CP2
+     * 4 = CP3
+     * 5 = CP4
+     */
+
+    const physicalCheckpoint =
+        stage - 1;
+
+
+    return res
+        .status(200)
+        .json({
+
+            success: true,
+
+            finished: false,
+
+            team: {
+                name:
+                    team.team_name,
+
+                currentStage:
+                    stage
+            },
+
+            stageLabel:
+                `CP ${physicalCheckpoint} / 5`,
+
+            clueTitle:
+                `Checkpoint ${physicalCheckpoint}`,
+
+            clue:
+                previousRoute.clue,
+
+            scanButton:
+                "Scan QR",
+
+            finalStage:
+                false
+        });
 };

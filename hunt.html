@@ -10,18 +10,17 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>The Hunt</title>
+    <title>Treasure Hunt</title>
 
     <link
         rel="stylesheet"
-        href="./hunt.css?v=1"
+        href="./hunt.css?v=3"
     >
 
 </head>
 
 
 <body>
-
 
 <div class="hunt-page">
 
@@ -41,20 +40,17 @@
         </div>
 
 
-        <div class="checkpoint-pill">
-
-            CP
-            <span id="checkpointNumber">
-                -
-            </span>
-            / 5
-
+        <div
+            id="stageLabel"
+            class="checkpoint-pill"
+        >
+            ...
         </div>
 
     </header>
 
 
-    <!-- CLUE SCREEN -->
+    <!-- CLUE -->
 
     <section
         id="clueScreen"
@@ -62,12 +58,12 @@
     >
 
         <p class="clue-label">
-            CURRENT CLUE
+            CURRENT OBJECTIVE
         </p>
 
 
-        <h1>
-            Seek Your Next Mark
+        <h1 id="clueTitle">
+            Preparing Hunt...
         </h1>
 
 
@@ -75,7 +71,7 @@
             id="clueText"
             class="clue-box"
         >
-            Loading clue...
+            Loading...
         </div>
 
 
@@ -102,19 +98,15 @@
 
 
         <h1>
-            Find the Mark
+            Scan the Mark
         </h1>
 
 
-        <div
-            id="qr-reader"
-        ></div>
+        <div id="qr-reader"></div>
 
 
         <p id="scannerStatus">
-
-            Point the camera at the QR code.
-
+            Point your camera at the QR code.
         </p>
 
 
@@ -122,7 +114,7 @@
             class="secondary-button"
             onclick="closeScanner()"
         >
-            Back to Clue
+            Return to Clue
         </button>
 
     </section>
@@ -144,7 +136,7 @@
 
 
         <h1 id="resultTitle">
-            Checkpoint Complete
+            Stage Complete
         </h1>
 
 
@@ -164,7 +156,7 @@
             id="scanNextButton"
             onclick="continueHunt()"
         >
-            Scan Next
+            Continue
         </button>
 
     </section>
@@ -173,14 +165,9 @@
 </div>
 
 
-<script
-    src="https://unpkg.com/html5-qrcode"
-></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
-<script
-    src="./hunt.js?v=2"
-></script>
-
+<script src="./hunt.js?v=4"></script>
 
 </body>
 

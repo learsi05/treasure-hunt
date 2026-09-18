@@ -12,18 +12,28 @@ const supabase =
     );
 
 
-function getCookie(req, name) {
+function getCookie(
+    req,
+    name
+) {
 
     const header =
         req.headers.cookie || "";
 
-    for (const cookie of header.split(";")) {
+
+    for (
+        const cookie
+        of header.split(";")
+    ) {
 
         const [
             key,
             ...values
         ] =
-            cookie.trim().split("=");
+            cookie
+                .trim()
+                .split("=");
+
 
         if (key === name) {
 
@@ -32,6 +42,7 @@ function getCookie(req, name) {
             );
         }
     }
+
 
     return null;
 }
@@ -47,27 +58,45 @@ function hashToken(token) {
 
 
 module.exports =
-async function handler(req, res) {
+async function handler(
+    req,
+    res
+) {
 
-    if (req.method !== "POST") {
+    if (
+        req.method !== "POST"
+    ) {
 
-        return res.status(405).json({
-            success: false
-        });
+        return res
+            .status(405)
+            .json({
+                success: false
+            });
     }
 
 
     const {
         qrCode
-    } = req.body || {};
+    } =
+        req.body || {};
 
 
     if (!qrCode) {
 
-        return res.status(400).json({
-            success: false
-        });
+        return res
+            .status(400)
+            .json({
+                success: false,
+
+                message:
+                    "No QR detected."
+            });
     }
+
+
+    const scanned =
+        String(qrCode)
+            .trim();
 
 
     const token =
@@ -79,47 +108,75 @@ async function handler(req, res) {
 
     if (!token) {
 
-        return res.status(401).json({
-            success: false
-        });
+        return res
+            .status(401)
+            .json({
+                success: false
+            });
     }
 
 
-    const hash =
+    const tokenHash =
         hashToken(token);
 
 
     const {
         data: team
-    } = await supabase
-        .from("teams")
-        .select(`
-            id,
-            team_name,
-            current_checkpoint
-        `)
-        .eq(
-            "active_session_token",
-            hash
-        )
-        .maybeSingle();
+    } =
+        await supabase
+            .from("teams")
+            .select(`
+                id,
+                team_name,
+                current_checkpoint,
+                finished_at
+            `)
+            .eq(
+                "active_session_token",
+                tokenHash
+            )
+            .maybeSingle();
 
 
     if (!team) {
 
-        return res.status(401).json({
-            success: false
-        });
+        return res
+            .status(401)
+            .json({
+                success: false
+            });
+    }
+
+
+    if (team.finished_at) {
+
+        return res
+            .status(400)
+            .json({
+                success: false,
+
+                message:
+                    "This team has already finished."
+            });
     }
 
 
     const {
         data: event
-    } = await supabase
-        .from("event_config")
-        .select("status")
-        .eq("id", 1)
-        .single();
+    } =
+        await supabase
+            .from(
+                "event_config"
+            )
+            .select(`
+                status,
+                final_qr_code
+            `)
+            .eq(
+                "id",
+                1
+            )
+            .single();
 
 
     if (
@@ -127,128 +184,95 @@ async function handler(req, res) {
         "running"
     ) {
 
-        return res.status(409).json({
-            success: false,
-            code:
-                "EVENT_NOT_RUNNING",
+        return res
+            .status(409)
+            .json({
+                success: false,
 
-            message:
-                "The event is not currently running."
-        });
+                message:
+                    "The event is not currently running."
+            });
     }
 
 
-    if (
-        team.current_checkpoint > 5
-    ) {
-
-        return res.status(400).json({
-            success: false,
-            code:
-                "CHECKPOINTS_COMPLETE",
-
-            message:
-                "All five checkpoints are already complete."
-        });
-    }
+    const stage =
+        team.current_checkpoint;
 
 
-    const {
-        data: expected
-    } = await supabase
-        .from("team_routes")
-        .select(`
-            qr_code,
-            checkpoint_number
-        `)
-        .eq(
-            "team_id",
-            team.id
-        )
-        .eq(
-            "checkpoint_number",
-            team.current_checkpoint
-        )
-        .single();
+    /* =====================================================
+       FINAL COMMON QR
+       Stage 6
+    ===================================================== */
+
+    if (stage === 6) {
+
+        if (
+            scanned !==
+            event.final_qr_code
+        ) {
+
+            await supabase
+                .from(
+                    "scan_attempts"
+                )
+                .insert({
+                    team_id:
+                        team.id,
+
+                    scanned_qr:
+                        scanned,
+
+                    expected_checkpoint:
+                        6,
+
+                    result:
+                        "WRONG_FINAL_QR"
+                });
 
 
-    if (!expected) {
+            return res
+                .status(400)
+                .json({
+                    success: false,
 
-        return res.status(500).json({
-            success: false,
+                    code:
+                        "WRONG_FINAL_QR",
 
-            message:
-                "Checkpoint has not been configured."
-        });
-    }
-
-
-    const scanned =
-        String(qrCode)
-            .trim();
+                    message:
+                        "This is not the final treasure QR."
+                });
+        }
 
 
-    // ---------------------------------
-    // CORRECT QR
-    // ---------------------------------
-
-    if (
-        scanned ===
-        expected.qr_code
-    ) {
-
-        const completed =
-            team.current_checkpoint;
+        const finishTime =
+            new Date()
+                .toISOString();
 
 
-        const {
-            error: scanError
-        } = await supabase
+        await supabase
             .from(
-                "checkpoint_scans"
+                "final_scans"
             )
             .upsert(
                 {
                     team_id:
                         team.id,
 
-                    checkpoint_number:
-                        completed,
-
-                    qr_code:
-                        scanned,
-
                     scanned_at:
-                        new Date()
-                            .toISOString()
+                        finishTime
                 },
                 {
                     onConflict:
-                        "team_id,checkpoint_number"
+                        "team_id"
                 }
             );
-
-
-        if (scanError) {
-
-            return res.status(500).json({
-                success: false,
-
-                message:
-                    "Could not record checkpoint."
-            });
-        }
-
-
-        const nextCheckpoint =
-            completed + 1;
 
 
         await supabase
             .from("teams")
             .update({
-                current_checkpoint:
-                    nextCheckpoint
+                finished_at:
+                    finishTime
             })
             .eq(
                 "id",
@@ -256,79 +280,214 @@ async function handler(req, res) {
             );
 
 
-        if (
-            nextCheckpoint <= 5
-        ) {
-
-            const {
-                data: nextRoute
-            } = await supabase
-                .from("team_routes")
-                .select("clue")
-                .eq(
-                    "team_id",
-                    team.id
-                )
-                .eq(
-                    "checkpoint_number",
-                    nextCheckpoint
-                )
-                .single();
-
-
-            return res.status(200).json({
+        return res
+            .status(200)
+            .json({
 
                 success: true,
 
-                completedCheckpoint:
-                    completed,
+                finished: true,
 
-                nextCheckpoint,
-
-                nextClue:
-                    nextRoute.clue,
-
-                finalStage:
-                    false
+                finishTime
             });
-        }
-
-
-        return res.status(200).json({
-
-            success: true,
-
-            completedCheckpoint:
-                completed,
-
-            nextCheckpoint: 6,
-
-            nextClue:
-                "All five checkpoints completed. The final hunt awaits.",
-
-            finalStage:
-                true
-        });
     }
 
 
-    // ---------------------------------
-    // FIND WHO THIS QR BELONGS TO
-    // ---------------------------------
+    /* =====================================================
+       PREVENT EARLY FINAL QR
+    ===================================================== */
+
+    if (
+        event.final_qr_code &&
+        scanned ===
+        event.final_qr_code
+    ) {
+
+        return res
+            .status(400)
+            .json({
+
+                success: false,
+
+                code:
+                    "FINAL_LOCKED",
+
+                message:
+                    "The final checkpoint is locked. Complete your route first."
+            });
+    }
+
+
+    /* =====================================================
+       EXPECTED TEAM-SPECIFIC QR
+    ===================================================== */
+
+    const {
+        data: expected
+    } =
+        await supabase
+            .from(
+                "team_routes"
+            )
+            .select(`
+                qr_code,
+                clue,
+                checkpoint_number
+            `)
+            .eq(
+                "team_id",
+                team.id
+            )
+            .eq(
+                "checkpoint_number",
+                stage
+            )
+            .single();
+
+
+    if (!expected) {
+
+        return res
+            .status(500)
+            .json({
+                success: false,
+
+                message:
+                    "This stage has not been configured."
+            });
+    }
+
+
+    /* =====================================================
+       CORRECT QR
+    ===================================================== */
+
+    if (
+        scanned ===
+        expected.qr_code
+    ) {
+
+        const scanTime =
+            new Date()
+                .toISOString();
+
+
+        const {
+            error: scanError
+        } =
+            await supabase
+                .from(
+                    "checkpoint_scans"
+                )
+                .upsert(
+                    {
+                        team_id:
+                            team.id,
+
+                        checkpoint_number:
+                            stage,
+
+                        qr_code:
+                            scanned,
+
+                        scanned_at:
+                            scanTime
+                    },
+                    {
+                        onConflict:
+                            "team_id,checkpoint_number"
+                    }
+                );
+
+
+        if (scanError) {
+
+            return res
+                .status(500)
+                .json({
+                    success: false,
+
+                    message:
+                        "Could not record checkpoint."
+                });
+        }
+
+
+        const nextStage =
+            stage + 1;
+
+
+        await supabase
+            .from("teams")
+            .update({
+                current_checkpoint:
+                    nextStage
+            })
+            .eq(
+                "id",
+                team.id
+            );
+
+
+        let completedLabel;
+
+
+        if (stage === 1) {
+
+            completedLabel =
+                "Starting QR";
+
+        } else {
+
+            completedLabel =
+                `Checkpoint ${stage - 1}`;
+        }
+
+
+        return res
+            .status(200)
+            .json({
+
+                success: true,
+
+                finished: false,
+
+                completedStage:
+                    stage,
+
+                completedLabel,
+
+                nextStage,
+
+                revealedClue:
+                    expected.clue,
+
+                finalStage:
+                    nextStage === 6
+            });
+    }
+
+
+    /* =====================================================
+       WRONG QR CLASSIFICATION
+    ===================================================== */
 
     const {
         data: qrOwner
-    } = await supabase
-        .from("team_routes")
-        .select(`
-            team_id,
-            checkpoint_number
-        `)
-        .eq(
-            "qr_code",
-            scanned
-        )
-        .maybeSingle();
+    } =
+        await supabase
+            .from(
+                "team_routes"
+            )
+            .select(`
+                team_id,
+                checkpoint_number
+            `)
+            .eq(
+                "qr_code",
+                scanned
+            )
+            .maybeSingle();
 
 
     let resultCode =
@@ -336,7 +495,7 @@ async function handler(req, res) {
 
 
     let message =
-        "This mark is not part of your current path.";
+        "This QR is not part of your current path.";
 
 
     if (qrOwner) {
@@ -349,20 +508,22 @@ async function handler(req, res) {
             resultCode =
                 "WRONG_TEAM";
 
+
             message =
-                "This checkpoint belongs to another team's path.";
+                "This QR belongs to another team.";
         }
 
         else if (
             qrOwner.checkpoint_number >
-            team.current_checkpoint
+            stage
         ) {
 
             resultCode =
                 "FUTURE_CHECKPOINT";
 
+
             message =
-                "You have discovered a future checkpoint. Complete your current checkpoint first.";
+                "You found a future checkpoint. Complete your current stage first.";
         }
 
         else {
@@ -370,15 +531,19 @@ async function handler(req, res) {
             resultCode =
                 "OLD_CHECKPOINT";
 
+
             message =
-                "You have already completed this checkpoint.";
+                "You have already completed this QR.";
         }
     }
 
 
     await supabase
-        .from("scan_attempts")
+        .from(
+            "scan_attempts"
+        )
         .insert({
+
             team_id:
                 team.id,
 
@@ -386,20 +551,22 @@ async function handler(req, res) {
                 scanned,
 
             expected_checkpoint:
-                team.current_checkpoint,
+                stage,
 
             result:
                 resultCode
         });
 
 
-    return res.status(400).json({
+    return res
+        .status(400)
+        .json({
 
-        success: false,
+            success: false,
 
-        code:
-            resultCode,
+            code:
+                resultCode,
 
-        message
-    });
+            message
+        });
 };
