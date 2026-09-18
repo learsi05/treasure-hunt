@@ -305,43 +305,63 @@
         <!-- EVENT -->
 
         <section
-            id="eventSection"
-            class="section hidden"
+    id="eventSection"
+    class="section hidden"
+>
+
+    <div class="panel">
+
+        <h3>Event Control</h3>
+
+        <p class="panel-description">
+            Ensure all four team leaders are logged in
+            and have successfully completed the camera check
+            before starting the hunt.
+        </p>
+
+        <div class="event-status-box">
+
+            <span>Current Event Status</span>
+
+            <strong id="eventStatus">
+                WAITING
+            </strong>
+
+        </div>
+
+        <h4 style="margin-top: 25px; margin-bottom: 15px;">
+            Team Readiness
+        </h4>
+
+        <div
+            id="readyTeamList"
+            class="ready-team-list"
         >
+            Loading teams...
+        </div>
 
-            <div class="panel">
+        <p
+            id="eventMessage"
+            class="message"
+        ></p>
 
-                <h3>Event Control</h3>
+        <button
+            id="startEventButton"
+            class="start-event-button"
+            onclick="startEvent()"
+            disabled
+        >
+            Waiting for all teams
+        </button>
 
-                <p class="panel-description">
-                    The event will eventually start simultaneously
-                    for all four teams from this screen.
-                </p>
+        <p class="danger-note">
+            The event can start only after all four teams
+            complete login and camera verification.
+        </p>
 
-                <div class="event-status-box">
+    </div>
 
-                    <span>Current Status</span>
-
-                    <strong id="eventStatus">
-                        WAITING
-                    </strong>
-
-                </div>
-
-                <button
-                    class="start-event-button"
-                    disabled
-                >
-                    Start Event
-                </button>
-
-                <small>
-                    We will activate this in the next stage.
-                </small>
-
-            </div>
-
-        </section>
+</section>
 
 
         <!-- LIVE PROGRESS -->
