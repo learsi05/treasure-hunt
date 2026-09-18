@@ -71,46 +71,273 @@ module.exports = async function handler(req, res) {
     // GET EVENT STATUS
     // --------------------------
 
-    if (req.method === "GET") {
+    /* =========================================
+   GET EVENT STATUS + READINESS + PROGRESS
+========================================= */
 
-        const {
-            data: event,
-            error
-        } = await supabase
-            .from("event_config")
-            .select(`
-                status,
-                started_at
-            `)
-            .eq("id", 1)
-            .single();
+if (req.method === "GET") {
 
-        if (error) {
+    // ---------------------------------
+    // EVENT
+    // ---------------------------------
 
-            return res.status(500).json({
-                success: false,
-                message:
-                    "Could not load event."
-            });
-        }
+    const {
+        data: event,
+        error: eventError
+    } = await supabase
+        .from("event_config")
+        .select(`
+            status,
+            started_at
+        `)
+        .eq("id", 1)
+        .single();
 
-        const {
-            data: teams
-        } = await supabase
-            .from("teams")
-            .select(`
-                id,
-                team_name,
-                camera_ready
-            `)
-            .order("id");
 
-        return res.status(200).json({
-            success: true,
-            event,
-            teams: teams || []
+    if (eventError) {
+
+        console.error(
+            "EVENT LOAD ERROR:",
+            eventError
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Could not load event."
         });
     }
+
+
+    // ---------------------------------
+    // TEAMS
+    // ---------------------------------
+
+    const {
+        data: teams,
+        error: teamError
+    } = await supabase
+        .from("teams")
+        .select(`
+            id,
+            team_name,
+            current_checkpoint,
+            camera_ready,
+            finished_at
+        `)
+        .order("id");
+
+
+    if (teamError) {
+
+        console.error(
+            "TEAM LOAD ERROR:",
+            teamError
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Could not load teams."
+        });
+    }
+
+
+    // ---------------------------------
+    // CHECKPOINT SCANS
+    // ---------------------------------
+
+    const {
+        data: scans,
+        error: scanError
+    } = await supabase
+        .from("checkpoint_scans")
+        .select(`
+            team_id,
+            checkpoint_number,
+            scanned_at
+        `)
+        .order("scanned_at");
+
+
+    if (scanError) {
+
+        console.error(
+            "SCAN LOAD ERROR:",
+            scanError
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Could not load checkpoint scans."
+        });
+    }
+
+
+    // ---------------------------------
+    // FINAL SCANS
+    // ---------------------------------
+
+    const {
+        data: finals,
+        error: finalError
+    } = await supabase
+        .from("final_scans")
+        .select(`
+            team_id,
+            scanned_at
+        `)
+        .order("scanned_at");
+
+
+    if (finalError) {
+
+        console.error(
+            "FINAL LOAD ERROR:",
+            finalError
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Could not load final scans."
+        });
+    }
+
+
+    // ---------------------------------
+    // BUILD LIVE PROGRESS
+    // ---------------------------------
+
+    const progress =
+        teams.map(team => {
+
+            const teamScans =
+                scans
+                    .filter(
+                        scan =>
+                            scan.team_id ===
+                            team.id
+                    )
+                    .sort(
+                        (a, b) =>
+                            a.checkpoint_number -
+                            b.checkpoint_number
+                    );
+
+
+            const finalScan =
+                finals.find(
+                    scan =>
+                        scan.team_id ===
+                        team.id
+                );
+
+
+            let currentStageLabel =
+                "START";
+
+
+            if (team.finished_at) {
+
+                currentStageLabel =
+                    "FINISHED";
+
+            } else {
+
+                switch (
+                    team.current_checkpoint
+                ) {
+
+                    case 1:
+                        currentStageLabel =
+                            "START";
+                        break;
+
+                    case 2:
+                        currentStageLabel =
+                            "CP1";
+                        break;
+
+                    case 3:
+                        currentStageLabel =
+                            "CP2";
+                        break;
+
+                    case 4:
+                        currentStageLabel =
+                            "CP3";
+                        break;
+
+                    case 5:
+                        currentStageLabel =
+                            "CP4";
+                        break;
+
+                    case 6:
+                        currentStageLabel =
+                            "CP5 FINAL";
+                        break;
+                }
+            }
+
+
+            return {
+
+                id:
+                    team.id,
+
+                name:
+                    team.team_name,
+
+                cameraReady:
+                    team.camera_ready,
+
+                currentStage:
+                    team.current_checkpoint,
+
+                currentStageLabel,
+
+                finishedAt:
+                    team.finished_at,
+
+                scans:
+                    teamScans,
+
+                finalScan:
+                    finalScan || null
+            };
+        });
+
+
+    // ---------------------------------
+    // RESPONSE
+    // ---------------------------------
+
+    return res.status(200).json({
+
+        success: true,
+
+        event,
+
+        // Used by Event Control readiness
+        teams:
+            teams.map(team => ({
+                id:
+                    team.id,
+
+                team_name:
+                    team.team_name,
+
+                camera_ready:
+                    team.camera_ready
+            })),
+
+        // Used by Live Progress
+        progress
+    });
+}
 
     // --------------------------
     // START EVENT

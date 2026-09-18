@@ -2067,7 +2067,7 @@ async function loadLiveProgress() {
 
         const response =
             await fetch(
-                "/api/admin-progress",
+                "/api/admin-event",
                 {
                     cache: "no-store"
                 }
