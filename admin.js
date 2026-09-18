@@ -1,6 +1,9 @@
 let teams = [];
 let adminRefreshTimer = null;
 let routeData = {};
+let liveProgressData = null;
+
+let liveTimerInterval = null;
 /* ============================
    PAGE STARTUP
 ============================ */
@@ -138,14 +141,29 @@ function showDashboard() {
         );
     }
     loadFinalQR();
-}
+    loadLiveProgress();
 
+
+if (!liveTimerInterval) {
+
+    liveTimerInterval =
+        setInterval(
+            updateLiveTimer,
+            1000
+        );
+}
+}
 
 async function refreshAdminData() {
 
     await Promise.all([
+
         loadTeams(),
-        loadEventStatus()
+
+        loadEventStatus(),
+
+        loadLiveProgress()
+
     ]);
 }
 
@@ -2042,4 +2060,511 @@ async function saveFinalQR() {
         )
         .innerText =
             value;
+}
+async function loadLiveProgress() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin-progress",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            location.reload();
+            return;
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            console.error(
+                result.message
+            );
+
+            return;
+        }
+
+
+        liveProgressData =
+            result;
+
+
+        renderLiveProgress(
+            result
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "LIVE PROGRESS ERROR:",
+            error
+        );
+    }
+}
+function renderLiveProgress(data) {
+
+    const grid =
+        document.getElementById(
+            "liveProgressGrid"
+        );
+
+
+    if (!grid) {
+        return;
+    }
+
+
+    document
+        .getElementById(
+            "liveEventStatus"
+        )
+        .innerText =
+            (
+                data.event.status ||
+                "waiting"
+            ).toUpperCase();
+
+
+    grid.innerHTML = "";
+
+
+    if (
+        data.progress.length === 0
+    ) {
+
+        grid.innerHTML =
+            `
+            <div class="progress-loading">
+                No teams registered.
+            </div>
+            `;
+
+        return;
+    }
+
+
+    data.progress.forEach(team => {
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            team.finishedAt
+                ?
+                "live-team-card finished"
+                :
+                "live-team-card";
+
+
+        const stageTimes = {};
+
+
+        team.scans.forEach(scan => {
+
+            stageTimes[
+                scan.checkpoint_number
+            ] =
+                scan.scanned_at;
+        });
+
+
+        const completedTeamStages =
+            team.scans.length;
+
+
+        const finalDone =
+            Boolean(
+                team.finalScan
+            );
+
+
+        const totalCompleted =
+            completedTeamStages +
+            (
+                finalDone
+                    ? 1
+                    : 0
+            );
+
+
+        const stages = [
+
+            {
+                stage:
+                    1,
+
+                label:
+                    "START",
+
+                time:
+                    stageTimes[1]
+            },
+
+            {
+                stage:
+                    2,
+
+                label:
+                    "CP1",
+
+                time:
+                    stageTimes[2]
+            },
+
+            {
+                stage:
+                    3,
+
+                label:
+                    "CP2",
+
+                time:
+                    stageTimes[3]
+            },
+
+            {
+                stage:
+                    4,
+
+                label:
+                    "CP3",
+
+                time:
+                    stageTimes[4]
+            },
+
+            {
+                stage:
+                    5,
+
+                label:
+                    "CP4",
+
+                time:
+                    stageTimes[5]
+            },
+
+            {
+                stage:
+                    6,
+
+                label:
+                    "CP5",
+
+                time:
+                    team.finalScan
+                        ?
+                        team.finalScan
+                            .scanned_at
+                        :
+                        null
+            }
+
+        ];
+
+
+        let routeHTML = "";
+
+
+        stages.forEach(stage => {
+
+            let state =
+                "";
+
+
+            if (stage.time) {
+
+                state =
+                    "complete";
+
+            } else if (
+                !team.finishedAt &&
+                team.currentStage ===
+                stage.stage
+            ) {
+
+                state =
+                    "current";
+            }
+
+
+            routeHTML += `
+
+                <div
+                    class="
+                        live-route-stage
+                        ${state}
+                    "
+                >
+
+                    <div class="stage-circle">
+
+                        ${
+                            stage.time
+                                ? "✓"
+                                : stage.stage === 6
+                                    ? "🏁"
+                                    : stage.stage === 1
+                                        ? "S"
+                                        : stage.stage - 1
+                        }
+
+                    </div>
+
+                    <span class="stage-name">
+                        ${stage.label}
+                    </span>
+
+                    <span class="stage-time">
+
+                        ${
+                            stage.time
+                                ?
+                                formatClockTime(
+                                    stage.time
+                                )
+                                :
+                                "—"
+                        }
+
+                    </span>
+
+                </div>
+
+            `;
+        });
+
+
+        let finishText =
+            "";
+
+
+        if (
+            team.finishedAt &&
+            data.event.started_at
+        ) {
+
+            finishText =
+                `Finished in ${
+                    formatDuration(
+                        data.event.started_at,
+                        team.finishedAt
+                    )
+                }`;
+        }
+
+
+        card.innerHTML = `
+
+            <div class="live-team-top">
+
+                <div class="live-team-name">
+
+                    ${escapeHTML(
+                        team.name
+                    )}
+
+                </div>
+
+
+                <div
+                    class="
+                        current-stage-badge
+                        ${
+                            team.finishedAt
+                                ? "finished"
+                                : ""
+                        }
+                    "
+                >
+
+                    ${
+                        team.currentStageLabel
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="live-route">
+
+                ${routeHTML}
+
+            </div>
+
+
+            <div class="live-team-footer">
+
+                <span class="progress-count">
+
+                    ${totalCompleted} / 6 stages completed
+
+                </span>
+
+
+                <span class="finish-time">
+
+                    ${finishText}
+
+                </span>
+
+            </div>
+
+        `;
+
+
+        grid.appendChild(
+            card
+        );
+    });
+}
+function formatClockTime(
+    timestamp
+) {
+
+    if (!timestamp) {
+        return "—";
+    }
+
+
+    const date =
+        new Date(timestamp);
+
+
+    return date
+        .toLocaleTimeString(
+            [],
+            {
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit"
+            }
+        );
+}
+
+
+function formatDuration(
+    start,
+    end
+) {
+
+    const startMs =
+        new Date(start)
+            .getTime();
+
+
+    const endMs =
+        new Date(end)
+            .getTime();
+
+
+    let seconds =
+        Math.max(
+            0,
+            Math.floor(
+                (
+                    endMs -
+                    startMs
+                ) /
+                1000
+            )
+        );
+
+
+    const hours =
+        Math.floor(
+            seconds / 3600
+        );
+
+
+    seconds %=
+        3600;
+
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+
+    seconds %=
+        60;
+
+
+    return (
+        String(hours)
+            .padStart(2, "0")
+        +
+        ":"
+        +
+        String(minutes)
+            .padStart(2, "0")
+        +
+        ":"
+        +
+        String(seconds)
+            .padStart(2, "0")
+    );
+}
+function updateLiveTimer() {
+
+    const timer =
+        document.getElementById(
+            "liveEventTimer"
+        );
+
+
+    if (
+        !timer ||
+        !liveProgressData
+    ) {
+        return;
+    }
+
+
+    const event =
+        liveProgressData.event;
+
+
+    if (
+        event.status !==
+        "running" ||
+        !event.started_at
+    ) {
+
+        timer.innerText =
+            "00:00:00";
+
+        return;
+    }
+
+
+    timer.innerText =
+        formatDuration(
+            event.started_at,
+            new Date()
+                .toISOString()
+        );
 }

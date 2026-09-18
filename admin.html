@@ -663,26 +663,64 @@
 
 </section>
 
+<!-- LIVE PROGRESS -->
 
-        <!-- LIVE PROGRESS -->
+<section
+    id="progressSection"
+    class="section hidden"
+>
 
-        <section
-            id="progressSection"
-            class="section hidden"
-        >
+    <div class="live-progress-header">
 
-            <div class="panel">
+        <div>
 
-                <h3>Live Team Progress</h3>
-
-                <p>
-                    Checkpoint monitoring will appear here once
-                    we connect the QR scanning system.
-                </p>
-
+            <div class="route-kicker">
+                🧭 LIVE MONITORING
             </div>
 
-        </section>
+            <h2>
+                Team Progress
+            </h2>
+
+            <p>
+                Checkpoint activity updates automatically.
+                No page refresh is required.
+            </p>
+
+        </div>
+
+
+        <div class="live-event-box">
+
+            <small>
+                EVENT STATUS
+            </small>
+
+            <strong id="liveEventStatus">
+                WAITING
+            </strong>
+
+            <span id="liveEventTimer">
+                00:00:00
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="liveProgressGrid"
+        class="live-progress-grid"
+    >
+
+        <div class="progress-loading">
+            Loading team progress...
+        </div>
+
+    </div>
+
+</section>
 
 
         <!-- RESULTS -->
