@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,19 +9,23 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <!-- Prevent stale event screen -->
+    <meta
+        http-equiv="Cache-Control"
+        content="no-cache, no-store, must-revalidate"
+    >
+
     <title>The Hunt | Treasure Hunt</title>
 
     <link
         rel="stylesheet"
-        href="./auth.css?v=2"
+        href="./auth.css?v=3"
     >
-
 </head>
 
 <body>
 
 <div class="background-layer"></div>
-
 
 <main class="auth-wrapper">
 
@@ -40,22 +43,43 @@
             Hunt Active
         </h1>
 
+        <div
+            id="huntTeamName"
+            class="team-badge"
+        >
+            Checking team...
+        </div>
+
         <p class="quote">
-            Your first clue will appear here.
+            Stay alert. Your next clue awaits.
         </p>
 
         <div class="divider">
             <span>🧭</span>
         </div>
 
-        <p>
-            QR scanner and checkpoint system
-            will be connected in the next stage.
+        <div
+            id="huntStatus"
+            class="status-pill"
+        >
+            Checking event...
+        </div>
+
+        <p
+            id="huntMessage"
+            style="
+                margin-top:20px;
+                line-height:1.7;
+            "
+        >
+            Preparing the hunt...
         </p>
 
     </section>
 
 </main>
+
+<script src="./hunt.js?v=1"></script>
 
 </body>
 
