@@ -1,0 +1,226 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    min-height: 100vh;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2c1a0d,
+            #120b06
+        );
+
+    color: #3b2513;
+}
+
+
+.hunt-page {
+
+    width: 100%;
+    max-width: 600px;
+
+    margin: auto;
+
+    padding: 20px;
+
+    min-height: 100vh;
+}
+
+
+.hunt-header {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    color: white;
+
+    margin-bottom: 20px;
+}
+
+
+.hunt-header small {
+
+    color: #d6a85f;
+
+    letter-spacing: 2px;
+}
+
+
+.checkpoint-pill {
+
+    background: #d49b42;
+
+    color: #1e1208;
+
+    padding: 9px 15px;
+
+    border-radius: 30px;
+
+    font-weight: bold;
+}
+
+
+.hunt-card {
+
+    background:
+        linear-gradient(
+            #f2ddb1,
+            #dfbd82
+        );
+
+    border:
+        3px solid #795127;
+
+    border-radius: 16px;
+
+    padding: 30px 24px;
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,.5);
+
+    text-align: center;
+}
+
+
+.clue-label {
+
+    color: #815827;
+
+    font-size: 12px;
+
+    letter-spacing: 3px;
+
+    margin-bottom: 10px;
+}
+
+
+.hunt-card h1 {
+
+    color: #4a2a10;
+
+    margin-bottom: 22px;
+}
+
+
+.clue-box {
+
+    background:
+        rgba(
+            255,
+            248,
+            225,
+            .55
+        );
+
+    border-left:
+        5px solid #865625;
+
+    border-radius: 8px;
+
+    padding: 24px;
+
+    margin: 20px 0;
+
+    line-height: 1.8;
+
+    font-size: 18px;
+
+    text-align: left;
+}
+
+
+button {
+
+    width: 100%;
+
+    padding: 15px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #704116;
+
+    color: #f8e5bd;
+
+    font-family: inherit;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+.secondary-button {
+
+    margin-top: 15px;
+
+    background: transparent;
+
+    color: #57351a;
+
+    border:
+        1px solid #795127;
+}
+
+
+#qr-reader {
+
+    width: 100%;
+
+    overflow: hidden;
+
+    border-radius: 12px;
+
+    background: black;
+
+    margin-bottom: 18px;
+}
+
+
+#scannerStatus {
+
+    margin-bottom: 16px;
+
+    line-height: 1.6;
+}
+
+
+.result-icon {
+
+    font-size: 55px;
+
+    color: #32722f;
+
+    margin-bottom: 10px;
+}
+
+
+.result-message {
+
+    line-height: 1.7;
+}
+
+
+.hidden {
+
+    display: none !important;
+}

@@ -1,48 +1,33 @@
-let huntCheckRunning = false;
+let qrScanner = null;
+
+let processingQR = false;
+
+let currentCheckpoint = 1;
 
 
 /* ==========================
-   CHECK EVENT / TEAM STATUS
+   LOAD HUNT
 ========================== */
 
-async function checkHuntStatus() {
-
-    if (huntCheckRunning) {
-        return;
-    }
-
-    huntCheckRunning = true;
-
+async function loadHunt() {
 
     try {
 
         const response =
             await fetch(
-                "/api/team-session",
+                "/api/hunt-state",
                 {
                     cache: "no-store"
                 }
             );
 
 
-        // --------------------------------
-        // Session disappeared
-        // Usually because admin reset event
-        // --------------------------------
+        if (
+            response.status === 401
+        ) {
 
-        if (response.status === 401) {
-
-            showResetMessage(
-                "The event has been reset. Returning to team login..."
-            );
-
-            setTimeout(
-                () => {
-                    window.location.replace(
-                        "./login.html"
-                    );
-                },
-                1200
+            window.location.replace(
+                "./login.html"
             );
 
             return;
@@ -53,203 +38,501 @@ async function checkHuntStatus() {
             await response.json();
 
 
-        if (!response.ok) {
+        if (
+            response.status === 409
+        ) {
 
-            showResetMessage(
-                result.message ||
-                "Session unavailable."
+            window.location.replace(
+                "./waiting.html"
             );
 
             return;
         }
 
 
-        /* Team name */
+        if (!response.ok) {
+
+            alert(
+                result.message ||
+                "Could not load hunt."
+            );
+
+            return;
+        }
+
+
+        if (result.finalStage) {
+
+            document
+                .getElementById(
+                    "clueText"
+                )
+                .innerText =
+                    "All five checkpoints are complete. Final stage coming next.";
+
+            return;
+        }
+
 
         document
             .getElementById(
-                "huntTeamName"
+                "teamName"
             )
             .innerText =
                 result.team.name;
 
 
-        /* Already finished */
-
-        if (
-            result.team.finishedAt
-        ) {
-
-            window.location.replace(
-                "./finished.html"
-            );
-
-            return;
-        }
-
-
-        /* EVENT RESET / WAITING */
-
-        if (
-            result.event.status ===
-            "waiting"
-        ) {
-
-            showResetMessage(
-                "The event has been reset."
-            );
-
-            setTimeout(
-                () => {
-
-                    window.location.replace(
-                        "./waiting.html"
-                    );
-
-                },
-                1000
-            );
-
-            return;
-        }
-
-
-        /* EVENT FINISHED */
-
-        if (
-            result.event.status ===
-            "finished"
-        ) {
-
-            document
-                .getElementById(
-                    "huntStatus"
-                )
-                .innerText =
-                    "EVENT FINISHED";
-
-
-            document
-                .getElementById(
-                    "huntMessage"
-                )
-                .innerText =
-                    "The Treasure Hunt has ended.";
-
-            return;
-        }
-
-
-        /* EVENT RUNNING */
-
-        if (
-            result.event.status ===
-            "running"
-        ) {
-
-            document
-                .getElementById(
-                    "huntStatus"
-                )
-                .innerText =
-                    "✓ EVENT RUNNING";
-
-
-            document
-                .getElementById(
-                    "huntMessage"
-                )
-                .innerText =
-                    `Checkpoint ${result.team.currentCheckpoint} — scanner will appear here.`;
-        }
-
-
-    } catch (error) {
-
-        console.error(
-            "HUNT STATUS ERROR:",
-            error
-        );
+        currentCheckpoint =
+            result.team.currentCheckpoint;
 
 
         document
             .getElementById(
-                "huntMessage"
+                "checkpointNumber"
             )
             .innerText =
-                "Connection interrupted. Retrying...";
+                currentCheckpoint;
 
 
-    } finally {
+        document
+            .getElementById(
+                "clueText"
+            )
+            .innerText =
+                result.clue;
 
-        huntCheckRunning =
-            false;
+
+    } catch (error) {
+
+        console.error(error);
     }
 }
 
 
-function showResetMessage(text) {
+loadHunt();
+
+
+/* ==========================
+   OPEN SCANNER
+========================== */
+
+async function openScanner() {
 
     document
         .getElementById(
-            "huntStatus"
+            "clueScreen"
         )
-        .innerText =
-            "EVENT RESET";
+        .classList
+        .add("hidden");
 
 
     document
         .getElementById(
-            "huntMessage"
+            "resultScreen"
         )
-        .innerText =
-            text;
+        .classList
+        .add("hidden");
+
+
+    document
+        .getElementById(
+            "scannerScreen"
+        )
+        .classList
+        .remove("hidden");
+
+
+    processingQR = false;
+
+
+    qrScanner =
+        new Html5Qrcode(
+            "qr-reader"
+        );
+
+
+    try {
+
+        await qrScanner.start(
+
+            {
+                facingMode:
+                    "environment"
+            },
+
+            {
+                fps: 10,
+
+                qrbox: {
+                    width: 240,
+                    height: 240
+                }
+            },
+
+            onQRDetected,
+
+            () => {}
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        document
+            .getElementById(
+                "scannerStatus"
+            )
+            .innerText =
+                "Could not open camera.";
+    }
 }
 
 
 /* ==========================
-   INITIAL CHECK
+   QR FOUND
 ========================== */
 
-checkHuntStatus();
+async function onQRDetected(
+    decodedText
+) {
+
+    if (processingQR) {
+        return;
+    }
+
+
+    processingQR =
+        true;
+
+
+    document
+        .getElementById(
+            "scannerStatus"
+        )
+        .innerText =
+            "Checking QR...";
+
+
+    try {
+
+        await stopScanner();
+
+
+        const response =
+            await fetch(
+                "/api/scan-qr",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            qrCode:
+                                decodedText
+                        })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            showWrongQR(
+                result.message
+            );
+
+            return;
+        }
+
+
+        showCheckpointSuccess(
+            result
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        showWrongQR(
+            "Connection error. Try again."
+        );
+    }
+}
 
 
 /* ==========================
-   AUTO REFRESH EVERY 2 SEC
+   VALID QR
+========================== */
+
+function showCheckpointSuccess(
+    result
+) {
+
+    document
+        .getElementById(
+            "scannerScreen"
+        )
+        .classList
+        .add("hidden");
+
+
+    document
+        .getElementById(
+            "resultScreen"
+        )
+        .classList
+        .remove("hidden");
+
+
+    document
+        .getElementById(
+            "resultIcon"
+        )
+        .innerText =
+            "✓";
+
+
+    document
+        .getElementById(
+            "resultTitle"
+        )
+        .innerText =
+            `Checkpoint ${result.completedCheckpoint} Complete`;
+
+
+    document
+        .getElementById(
+            "resultMessage"
+        )
+        .innerText =
+            "The mark is valid. Your path continues.";
+
+
+    document
+        .getElementById(
+            "nextClue"
+        )
+        .innerText =
+            result.nextClue;
+
+
+    const button =
+        document.getElementById(
+            "scanNextButton"
+        );
+
+
+    if (
+        result.finalStage
+    ) {
+
+        button.innerText =
+            "Continue to Final Stage";
+
+    } else {
+
+        button.innerText =
+            "Scan Next";
+    }
+}
+
+
+/* ==========================
+   WRONG QR
+========================== */
+
+function showWrongQR(message) {
+
+    document
+        .getElementById(
+            "scannerScreen"
+        )
+        .classList
+        .add("hidden");
+
+
+    document
+        .getElementById(
+            "resultScreen"
+        )
+        .classList
+        .remove("hidden");
+
+
+    document
+        .getElementById(
+            "resultIcon"
+        )
+        .innerText =
+            "✕";
+
+
+    document
+        .getElementById(
+            "resultTitle"
+        )
+        .innerText =
+            "Wrong Path";
+
+
+    document
+        .getElementById(
+            "resultMessage"
+        )
+        .innerText =
+            message;
+
+
+    document
+        .getElementById(
+            "nextClue"
+        )
+        .innerText =
+            "Return to your current clue and keep searching.";
+
+
+    const button =
+        document.getElementById(
+            "scanNextButton"
+        );
+
+
+    button.innerText =
+        "Try Again";
+}
+
+
+/* ==========================
+   CONTINUE
+========================== */
+
+async function continueHunt() {
+
+    await loadHunt();
+
+
+    document
+        .getElementById(
+            "resultScreen"
+        )
+        .classList
+        .add("hidden");
+
+
+    document
+        .getElementById(
+            "clueScreen"
+        )
+        .classList
+        .remove("hidden");
+}
+
+
+/* ==========================
+   CLOSE SCANNER
+========================== */
+
+async function closeScanner() {
+
+    await stopScanner();
+
+
+    document
+        .getElementById(
+            "scannerScreen"
+        )
+        .classList
+        .add("hidden");
+
+
+    document
+        .getElementById(
+            "clueScreen"
+        )
+        .classList
+        .remove("hidden");
+}
+
+
+async function stopScanner() {
+
+    if (!qrScanner) {
+        return;
+    }
+
+
+    try {
+
+        await qrScanner.stop();
+
+        await qrScanner.clear();
+
+    } catch (error) {
+
+        // Scanner may already
+        // have stopped.
+    }
+
+
+    qrScanner = null;
+}
+
+
+/* ==========================
+   EVENT RESET CHECK
 ========================== */
 
 setInterval(
-    checkHuntStatus,
-    2000
-);
+    async () => {
 
-
-/* ==========================
-   PHONE RETURNS FROM HOME /
-   SCREEN LOCK / ANOTHER APP
-========================== */
-
-document.addEventListener(
-    "visibilitychange",
-    () => {
-
-        if (
-            document.visibilityState ===
-            "visible"
-        ) {
-
-            checkHuntStatus();
+        if (processingQR) {
+            return;
         }
-    }
-);
 
 
-/* Browser back/forward cache */
+        try {
 
-window.addEventListener(
-    "pageshow",
-    () => {
+            const response =
+                await fetch(
+                    "/api/team-session",
+                    {
+                        cache:
+                            "no-store"
+                    }
+                );
 
-        checkHuntStatus();
-    }
+
+            if (
+                response.status ===
+                401
+            ) {
+
+                await stopScanner();
+
+
+                window.location.replace(
+                    "./login.html"
+                );
+            }
+
+
+        } catch (error) {
+            // Retry next interval
+        }
+
+    },
+    2500
 );

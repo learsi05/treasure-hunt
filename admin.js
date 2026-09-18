@@ -1,6 +1,6 @@
 let teams = [];
 let adminRefreshTimer = null;
-
+let routeData = {};
 /* ============================
    PAGE STARTUP
 ============================ */
@@ -172,20 +172,12 @@ async function adminLogout() {
 ============================ */
 
 const sections = {
-    overview:
-        "Overview",
-
-    teams:
-        "Manage Teams",
-
-    event:
-        "Event Control",
-
-    progress:
-        "Live Progress",
-
-    results:
-        "Results"
+    overview: "Overview",
+    teams: "Manage Teams",
+    routes: "Route & QR Setup",
+    event: "Event Control",
+    progress: "Live Progress",
+    results: "Results"
 };
 
 
@@ -727,6 +719,7 @@ function renderTeams() {
             );
         }
     );
+    populateRouteTeamSelector();
 }
 
 
@@ -1126,4 +1119,507 @@ async function resetEvent() {
         message.innerText =
             "Could not connect to server.";
     }
+}
+function populateRouteTeamSelector() {
+
+    const select =
+        document.getElementById(
+            "routeTeamSelect"
+        );
+
+    if (!select) {
+        return;
+    }
+
+
+    const current =
+        select.value;
+
+
+    select.innerHTML =
+        `
+        <option value="">
+            Select a team
+        </option>
+        `;
+
+
+    teams.forEach(team => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value =
+            team.id;
+
+        option.innerText =
+            team.team_name;
+
+        select.appendChild(
+            option
+        );
+    });
+
+
+    if (current) {
+        select.value = current;
+    }
+}
+async function loadTeamRoute() {
+
+    const teamId =
+        Number(
+            document
+                .getElementById(
+                    "routeTeamSelect"
+                )
+                .value
+        );
+
+
+    const editor =
+        document.getElementById(
+            "routeEditor"
+        );
+
+
+    if (!teamId) {
+
+        editor.classList.add(
+            "hidden"
+        );
+
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            `/api/admin-routes?teamId=${teamId}`,
+            {
+                cache: "no-store"
+            }
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        alert(
+            result.message
+        );
+
+        return;
+    }
+
+
+    routeData = {};
+
+
+    result.route.forEach(row => {
+
+        routeData[
+            row.checkpoint_number
+        ] = row;
+    });
+
+
+    renderRouteEditor(
+        teamId
+    );
+
+
+    editor.classList.remove(
+        "hidden"
+    );
+}
+function renderRouteEditor(teamId) {
+
+    const container =
+        document.getElementById(
+            "checkpointEditors"
+        );
+
+
+    container.innerHTML = "";
+
+
+    for (
+        let cp = 1;
+        cp <= 5;
+        cp++
+    ) {
+
+        const saved =
+            routeData[cp] || {};
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "checkpoint-editor";
+
+
+        card.innerHTML = `
+
+            <h3>
+                Checkpoint ${cp}
+            </h3>
+
+
+            <div class="checkpoint-grid">
+
+
+                <div class="qr-upload-box">
+
+                    <strong>
+                        QR Code
+                    </strong>
+
+
+                    <img
+                        id="qrPreview${cp}"
+                        class="qr-preview"
+                    >
+
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onchange="
+                            decodeUploadedQR(
+                                event,
+                                ${cp}
+                            )
+                        "
+                    >
+
+
+                    <p style="
+                        margin-top:12px;
+                        font-size:12px;
+                        color:#9ca3af;
+                    ">
+                        Upload the QR image placed
+                        at this checkpoint.
+                    </p>
+
+
+                    <div
+                        id="qrValue${cp}"
+                        class="qr-value"
+                    >
+                        ${
+                            saved.qr_code
+                                ?
+                                escapeHTML(
+                                    saved.qr_code
+                                )
+                                :
+                                "No QR selected"
+                        }
+                    </div>
+
+
+                    <input
+                        id="qrManual${cp}"
+                        type="text"
+                        value="${
+                            saved.qr_code
+                                ?
+                                escapeHTML(
+                                    saved.qr_code
+                                )
+                                :
+                                ""
+                        }"
+                        placeholder="Or enter QR value manually"
+                        style="margin-top:12px;"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Clue for Checkpoint ${cp}
+                    </strong>
+
+
+                    <p style="
+                        color:#6b7280;
+                        font-size:13px;
+                        margin:8px 0 12px;
+                    ">
+                        This clue is shown while
+                        the team searches for this QR.
+                    </p>
+
+
+                    <textarea
+                        id="clue${cp}"
+                        class="route-textarea"
+                        placeholder="Enter clue..."
+                    >${
+                        saved.clue
+                            ?
+                            escapeHTML(
+                                saved.clue
+                            )
+                            :
+                            ""
+                    }</textarea>
+
+                </div>
+
+
+            </div>
+
+
+            <button
+                class="save-route-button"
+                onclick="
+                    saveCheckpoint(
+                        ${teamId},
+                        ${cp}
+                    )
+                "
+            >
+                Save Checkpoint ${cp}
+            </button>
+
+        `;
+
+
+        container.appendChild(
+            card
+        );
+    }
+}
+async function decodeUploadedQR(
+    event,
+    checkpoint
+) {
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file) {
+        return;
+    }
+
+
+    const image =
+        new Image();
+
+
+    const preview =
+        document.getElementById(
+            `qrPreview${checkpoint}`
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            file
+        );
+
+
+    preview.src = url;
+
+    preview.style.display =
+        "block";
+
+
+    image.onload = () => {
+
+        const canvas =
+            document.createElement(
+                "canvas"
+            );
+
+
+        const context =
+            canvas.getContext(
+                "2d"
+            );
+
+
+        canvas.width =
+            image.width;
+
+        canvas.height =
+            image.height;
+
+
+        context.drawImage(
+            image,
+            0,
+            0
+        );
+
+
+        const imageData =
+            context.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+        const qr =
+            jsQR(
+                imageData.data,
+                canvas.width,
+                canvas.height
+            );
+
+
+        if (!qr) {
+
+            document
+                .getElementById(
+                    `qrValue${checkpoint}`
+                )
+                .innerText =
+                    "QR could not be detected.";
+
+
+            return;
+        }
+
+
+        const value =
+            qr.data;
+
+
+        document
+            .getElementById(
+                `qrValue${checkpoint}`
+            )
+            .innerText =
+                value;
+
+
+        document
+            .getElementById(
+                `qrManual${checkpoint}`
+            )
+            .value =
+                value;
+    };
+
+
+    image.src = url;
+}
+async function saveCheckpoint(
+    teamId,
+    checkpoint
+) {
+
+    const qrCode =
+        document
+            .getElementById(
+                `qrManual${checkpoint}`
+            )
+            .value
+            .trim();
+
+
+    const clue =
+        document
+            .getElementById(
+                `clue${checkpoint}`
+            )
+            .value
+            .trim();
+
+
+    const message =
+        document.getElementById(
+            "routeMessage"
+        );
+
+
+    if (
+        !qrCode ||
+        !clue
+    ) {
+
+        message.className =
+            "message error";
+
+        message.innerText =
+            `Checkpoint ${checkpoint}: QR and clue are required.`;
+
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            "/api/admin-routes",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+
+                        teamId,
+
+                        checkpointNumber:
+                            checkpoint,
+
+                        qrCode,
+
+                        clue
+
+                    })
+
+            }
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        message.className =
+            "message error";
+
+        message.innerText =
+            result.message;
+
+        return;
+    }
+
+
+    message.className =
+        "message success";
+
+    message.innerText =
+        `✓ Checkpoint ${checkpoint} saved.`;
+
+
+    await loadTeamRoute();
 }

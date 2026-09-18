@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,77 +10,177 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <!-- Prevent stale event screen -->
-    <meta
-        http-equiv="Cache-Control"
-        content="no-cache, no-store, must-revalidate"
-    >
-
-    <title>The Hunt | Treasure Hunt</title>
+    <title>The Hunt</title>
 
     <link
         rel="stylesheet"
-        href="./auth.css?v=3"
+        href="./hunt.css?v=1"
     >
+
 </head>
+
 
 <body>
 
-<div class="background-layer"></div>
 
-<main class="auth-wrapper">
+<div class="hunt-page">
 
-    <section class="parchment-card">
 
-        <div class="ornament">
-            ✦ ☠ ✦
+    <header class="hunt-header">
+
+        <div>
+
+            <small>
+                TREASURE HUNT
+            </small>
+
+            <h2 id="teamName">
+                Loading...
+            </h2>
+
         </div>
 
-        <p class="eyebrow">
-            THE HUNT HAS BEGUN
+
+        <div class="checkpoint-pill">
+
+            CP
+            <span id="checkpointNumber">
+                -
+            </span>
+            / 5
+
+        </div>
+
+    </header>
+
+
+    <!-- CLUE SCREEN -->
+
+    <section
+        id="clueScreen"
+        class="hunt-card"
+    >
+
+        <p class="clue-label">
+            CURRENT CLUE
         </p>
+
 
         <h1>
-            Hunt Active
+            Seek Your Next Mark
         </h1>
 
-        <div
-            id="huntTeamName"
-            class="team-badge"
-        >
-            Checking team...
-        </div>
-
-        <p class="quote">
-            Stay alert. Your next clue awaits.
-        </p>
-
-        <div class="divider">
-            <span>🧭</span>
-        </div>
 
         <div
-            id="huntStatus"
-            class="status-pill"
+            id="clueText"
+            class="clue-box"
         >
-            Checking event...
+            Loading clue...
         </div>
 
-        <p
-            id="huntMessage"
-            style="
-                margin-top:20px;
-                line-height:1.7;
-            "
+
+        <button
+            id="scanButton"
+            onclick="openScanner()"
         >
-            Preparing the hunt...
-        </p>
+            📷 Scan QR
+        </button>
 
     </section>
 
-</main>
 
-<script src="./hunt.js?v=1"></script>
+    <!-- SCANNER -->
+
+    <section
+        id="scannerScreen"
+        class="hunt-card hidden"
+    >
+
+        <p class="clue-label">
+            QR SCANNER
+        </p>
+
+
+        <h1>
+            Find the Mark
+        </h1>
+
+
+        <div
+            id="qr-reader"
+        ></div>
+
+
+        <p id="scannerStatus">
+
+            Point the camera at the QR code.
+
+        </p>
+
+
+        <button
+            class="secondary-button"
+            onclick="closeScanner()"
+        >
+            Back to Clue
+        </button>
+
+    </section>
+
+
+    <!-- RESULT -->
+
+    <section
+        id="resultScreen"
+        class="hunt-card hidden"
+    >
+
+        <div
+            id="resultIcon"
+            class="result-icon"
+        >
+            ✓
+        </div>
+
+
+        <h1 id="resultTitle">
+            Checkpoint Complete
+        </h1>
+
+
+        <p
+            id="resultMessage"
+            class="result-message"
+        ></p>
+
+
+        <div
+            id="nextClue"
+            class="clue-box"
+        ></div>
+
+
+        <button
+            id="scanNextButton"
+            onclick="continueHunt()"
+        >
+            Scan Next
+        </button>
+
+    </section>
+
+
+</div>
+
+
+<script
+    src="https://unpkg.com/html5-qrcode"
+></script>
+
+<script
+    src="./hunt.js?v=2"
+></script>
+
 
 </body>
 

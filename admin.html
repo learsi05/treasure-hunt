@@ -75,7 +75,12 @@
             >
                 👥 Manage Teams
             </button>
-
+            <button
+    class="nav-button"
+    onclick="showSection('routes', this)"
+>
+    🗺 Route & QR Setup
+</button>
             <button
                 class="nav-button"
                 onclick="showSection('event', this)"
@@ -300,7 +305,61 @@
             </div>
 
         </section>
+<!-- ROUTE AND QR SETUP -->
 
+<section
+    id="routesSection"
+    class="section hidden"
+>
+
+    <div class="panel">
+
+        <div class="section-header">
+
+            <div>
+                <h3>Route & QR Setup</h3>
+
+                <p>
+                    Assign five checkpoint QR codes and clues
+                    to each team.
+                </p>
+            </div>
+
+        </div>
+
+
+        <label class="route-label">
+            Select Team
+        </label>
+
+        <select
+            id="routeTeamSelect"
+            class="route-select"
+            onchange="loadTeamRoute()"
+        >
+            <option value="">
+                Select a team
+            </option>
+        </select>
+
+    </div>
+
+
+    <div
+        id="routeEditor"
+        class="hidden"
+    >
+
+        <div id="checkpointEditors"></div>
+
+        <p
+            id="routeMessage"
+            class="message"
+        ></p>
+
+    </div>
+
+</section>
 
         <!-- EVENT -->
 
