@@ -115,6 +115,8 @@ async function handler(req, res) {
                     current_checkpoint,
                     active_session_token,
                     login_time,
+                    camera_ready,
+                    ready_at,
                     finished_at
                 `)
                 .order(
@@ -318,8 +320,9 @@ async function handler(req, res) {
                     active_session_token:
                         null,
 
-                    login_time:
-                        null
+                    login_time: null,
+                    camera_ready: false,
+                    ready_at: null
 
                 })
                 .eq(

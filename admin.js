@@ -128,6 +128,7 @@ function showDashboard() {
         )
         .classList
         .remove("hidden");
+    loadEventStatus();
 }
 
 
@@ -293,6 +294,7 @@ async function loadTeams() {
 
 
     renderTeams();
+    loadEventStatus();
 }
 
 
@@ -764,4 +766,258 @@ function escapeJS(value) {
             /'/g,
             "\\'"
         );
+}
+async function loadEventStatus() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin-event"
+            );
+
+        if (response.status === 401) {
+
+            location.reload();
+
+            return;
+        }
+
+        const result =
+            await response.json();
+
+        if (!result.success) {
+            return;
+        }
+
+        renderEventStatus(
+            result.event,
+            result.teams
+        );
+
+    } catch (error) {
+
+        console.error(
+            "EVENT STATUS ERROR:",
+            error
+        );
+    }
+}
+
+
+function renderEventStatus(
+    event,
+    eventTeams
+) {
+
+    const status =
+        document.getElementById(
+            "eventStatus"
+        );
+
+    const overview =
+        document.getElementById(
+            "overviewStatus"
+        );
+
+    const readyList =
+        document.getElementById(
+            "readyTeamList"
+        );
+
+    const startButton =
+        document.getElementById(
+            "startEventButton"
+        );
+
+
+    const eventStatus =
+        (
+            event?.status ||
+            "waiting"
+        ).toUpperCase();
+
+
+    status.innerText =
+        eventStatus;
+
+    overview.innerText =
+        eventStatus;
+
+
+    readyList.innerHTML = "";
+
+
+    eventTeams.forEach(team => {
+
+        const item =
+            document.createElement(
+                "div"
+            );
+
+        item.className =
+            "ready-team";
+
+
+        item.innerHTML = `
+
+            <strong>
+                ${escapeHTML(
+                    team.team_name
+                )}
+            </strong>
+
+            <span class="${
+                team.camera_ready
+                    ? "ready"
+                    : "not-ready"
+            }">
+
+                ${
+                    team.camera_ready
+                        ? "✓ READY"
+                        : "NOT READY"
+                }
+
+            </span>
+
+        `;
+
+
+        readyList.appendChild(
+            item
+        );
+    });
+
+
+    const everyoneReady =
+        eventTeams.length === 4 &&
+        eventTeams.every(
+            team =>
+                team.camera_ready
+        );
+
+
+    if (
+        eventStatus === "RUNNING"
+    ) {
+
+        startButton.disabled =
+            true;
+
+        startButton.innerText =
+            "EVENT RUNNING";
+
+    } else {
+
+        startButton.disabled =
+            !everyoneReady;
+
+        startButton.innerText =
+            everyoneReady
+                ?
+                "⚡ START TREASURE HUNT"
+                :
+                "Waiting for all teams";
+    }
+}
+
+
+async function startEvent() {
+
+    const confirmed =
+        confirm(
+            "Start the Treasure Hunt now?\n\nAll four teams will begin simultaneously."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const button =
+        document.getElementById(
+            "startEventButton"
+        );
+
+
+    const message =
+        document.getElementById(
+            "eventMessage"
+        );
+
+
+    button.disabled = true;
+
+    button.innerText =
+        "Starting event...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin-event",
+                {
+                    method: "POST"
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            message.className =
+                "message error";
+
+            let text =
+                result.message;
+
+
+            if (
+                result.notReady &&
+                result.notReady.length
+            ) {
+
+                text +=
+                    "\nNot ready: " +
+                    result.notReady.join(", ");
+            }
+
+
+            message.innerText =
+                text;
+
+
+            await loadEventStatus();
+
+            return;
+        }
+
+
+        message.className =
+            "message success";
+
+        message.innerText =
+            "Treasure Hunt started successfully!";
+
+
+        await loadEventStatus();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.className =
+            "message error";
+
+        message.innerText =
+            "Could not start the event.";
+
+    }
 }

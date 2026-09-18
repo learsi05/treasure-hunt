@@ -227,7 +227,7 @@ function showCameraError(text) {
 // NEXT PAGE
 // --------------------------------
 
-function continueToWaiting() {
+async function continueToWaiting() {
 
     if (!cameraStream) {
 
@@ -238,18 +238,53 @@ function continueToWaiting() {
         return;
     }
 
+    continueButton.disabled = true;
+    continueButton.innerText = "Preparing team...";
 
-    // Close preview before moving
-    // to the next page.
+    try {
 
-    cameraStream
-        .getTracks()
-        .forEach(
-            track =>
-                track.stop()
+        const response = await fetch(
+            "/api/team-ready",
+            {
+                method: "POST"
+            }
         );
 
+        const result = await response.json();
 
-    window.location.href =
-        "./waiting.html";
+        if (!response.ok) {
+
+            showCameraError(
+                result.message ||
+                "Could not mark team ready."
+            );
+
+            continueButton.disabled = false;
+            continueButton.innerText =
+                "Camera Ready — Continue";
+
+            return;
+        }
+
+        cameraStream
+            .getTracks()
+            .forEach(
+                track => track.stop()
+            );
+
+        window.location.href =
+            "./waiting.html";
+
+    } catch (error) {
+
+        console.error(error);
+
+        showCameraError(
+            "Could not connect to the server."
+        );
+
+        continueButton.disabled = false;
+        continueButton.innerText =
+            "Camera Ready — Continue";
+    }
 }

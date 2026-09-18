@@ -10,11 +10,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Waiting | Treasure Hunt</title>
+    <title>Stand By | Treasure Hunt</title>
 
     <link
         rel="stylesheet"
-        href="./auth.css?v=1"
+        href="./auth.css?v=2"
     >
 
 </head>
@@ -22,41 +22,98 @@
 
 <body>
 
+
 <div class="background-layer"></div>
 
 
 <main class="auth-wrapper">
 
+
     <section class="parchment-card">
+
 
         <div class="ornament">
             ✦ ☠ ✦
         </div>
 
+
         <p class="eyebrow">
-            THE HUNT AWAITS
+            YOUR TEAM IS READY
         </p>
+
 
         <h1>
             Stand By
         </h1>
 
+
+        <div
+            id="waitingTeamName"
+            class="team-badge"
+        >
+            Loading team...
+        </div>
+
+
         <p class="quote">
-            Your team is ready.
+            The gates remain sealed until the
+            Hunt Master begins the event.
         </p>
+
 
         <div class="divider">
             <span>⌛</span>
         </div>
 
-        <p>
-            Wait for the administrator
-            to begin the event.
+
+        <div class="status-pill">
+
+            ✓ Login Verified
+
+        </div>
+
+        <br>
+
+        <div class="status-pill">
+
+            ✓ Camera Verified
+
+        </div>
+
+
+        <p
+            id="waitingStatus"
+            style="
+                margin-top:25px;
+                line-height:1.7;
+            "
+        >
+            Waiting for administrator...
         </p>
+
+
+        <div
+            class="waiting-loader"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+
+        <p
+            id="waitingMessage"
+            class="message"
+        ></p>
+
 
     </section>
 
+
 </main>
+
+
+<script src="./waiting.js?v=1"></script>
 
 </body>
 

@@ -500,3 +500,55 @@ button:disabled {
         width: 50px;
     }
 }
+.waiting-loader {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 24px;
+}
+
+
+.waiting-loader span {
+
+    width: 10px;
+    height: 10px;
+
+    background: #69431f;
+
+    border-radius: 50%;
+
+    animation:
+        waitingPulse
+        1.4s
+        infinite
+        ease-in-out;
+}
+
+
+.waiting-loader span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+
+.waiting-loader span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+
+@keyframes waitingPulse {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
