@@ -1245,7 +1245,6 @@ function renderRouteEditor(teamId) {
             "checkpointEditors"
         );
 
-
     container.innerHTML = "";
 
 
@@ -1257,6 +1256,13 @@ function renderRouteEditor(teamId) {
 
         const saved =
             routeData[cp] || {};
+
+
+        const configured =
+            Boolean(
+                saved.qr_code &&
+                saved.clue
+            );
 
 
         const card =
@@ -1271,68 +1277,112 @@ function renderRouteEditor(teamId) {
 
         card.innerHTML = `
 
-            <h3>
-                Checkpoint ${cp}
-            </h3>
+            <div class="checkpoint-title-row">
+
+                <h3>
+                    Checkpoint ${cp}
+                </h3>
+
+                <span
+                    class="
+                        checkpoint-status
+                        ${configured ? "saved" : ""}
+                    "
+                >
+
+                    ${
+                        configured
+                            ? "✓ CONFIGURED"
+                            : "NOT SAVED"
+                    }
+
+                </span>
+
+            </div>
+
+
+            <p class="checkpoint-help">
+
+                The clue below leads this team to
+                this checkpoint. The QR uploaded here
+                is the only QR accepted at this stage.
+
+            </p>
 
 
             <div class="checkpoint-grid">
 
 
-                <div class="qr-upload-box">
+                <!-- QR -->
 
-                    <strong>
-                        QR Code
-                    </strong>
+                <div class="qr-config-panel">
 
+                    <div class="config-label">
+                        📷 Assigned QR Code
+                    </div>
 
-                    <img
-                        id="qrPreview${cp}"
-                        class="qr-preview"
-                    >
-
-
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onchange="
-                            decodeUploadedQR(
-                                event,
-                                ${cp}
-                            )
-                        "
-                    >
+                    <div class="config-help">
+                        Upload the exact QR that will
+                        physically be placed at this location.
+                    </div>
 
 
-                    <p style="
-                        margin-top:12px;
-                        font-size:12px;
-                        color:#9ca3af;
-                    ">
-                        Upload the QR image placed
-                        at this checkpoint.
-                    </p>
+                    <div class="qr-drop-zone">
+
+                        <img
+                            id="qrPreview${cp}"
+                            class="qr-preview"
+                        >
 
 
-                    <div
-                        id="qrValue${cp}"
-                        class="qr-value"
-                    >
-                        ${
-                            saved.qr_code
-                                ?
-                                escapeHTML(
-                                    saved.qr_code
+                        <input
+                            type="file"
+                            accept="image/*"
+                            class="qr-file-input"
+
+                            onchange="
+                                decodeUploadedQR(
+                                    event,
+                                    ${cp}
                                 )
-                                :
-                                "No QR selected"
-                        }
+                            "
+                        >
+
+                    </div>
+
+
+                    <div class="decoded-wrapper">
+
+                        <span class="decoded-label">
+                            Decoded QR Value
+                        </span>
+
+                        <div
+                            id="qrValue${cp}"
+                            class="qr-value"
+                        >
+
+                            ${
+                                saved.qr_code
+                                    ?
+                                    escapeHTML(
+                                        saved.qr_code
+                                    )
+                                    :
+                                    "Upload a QR to decode it"
+                            }
+
+                        </div>
+
                     </div>
 
 
                     <input
                         id="qrManual${cp}"
+                        class="qr-manual-input"
+
                         type="text"
+
                         value="${
                             saved.qr_code
                                 ?
@@ -1342,34 +1392,39 @@ function renderRouteEditor(teamId) {
                                 :
                                 ""
                         }"
-                        placeholder="Or enter QR value manually"
-                        style="margin-top:12px;"
+
+                        placeholder="
+                            QR value appears here
+                        "
                     >
 
                 </div>
 
 
-                <div>
+                <!-- CLUE -->
 
-                    <strong>
-                        Clue for Checkpoint ${cp}
-                    </strong>
+                <div class="clue-config-panel">
 
+                    <div class="config-label">
+                        🧭 Clue Shown to Team
+                    </div>
 
-                    <p style="
-                        color:#6b7280;
-                        font-size:13px;
-                        margin:8px 0 12px;
-                    ">
-                        This clue is shown while
-                        the team searches for this QR.
-                    </p>
+                    <div class="config-help">
+
+                        This clue is shown BEFORE
+                        Checkpoint ${cp} is scanned.
+
+                        It should guide the team toward
+                        the location of this QR.
+
+                    </div>
 
 
                     <textarea
                         id="clue${cp}"
                         class="route-textarea"
-                        placeholder="Enter clue..."
+
+                        placeholder="Example: Where money sleeps behind glass, seek your next mark..."
                     >${
                         saved.clue
                             ?
@@ -1388,6 +1443,7 @@ function renderRouteEditor(teamId) {
 
             <button
                 class="save-route-button"
+
                 onclick="
                     saveCheckpoint(
                         ${teamId},
@@ -1395,7 +1451,9 @@ function renderRouteEditor(teamId) {
                     )
                 "
             >
+
                 Save Checkpoint ${cp}
+
             </button>
 
         `;

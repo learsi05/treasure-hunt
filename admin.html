@@ -7,7 +7,7 @@
 
     <title>Treasure Hunt Admin</title>
 
-    <link rel="stylesheet" href="./admin.css?v=2">
+    <link rel="stylesheet" href="./admin.css?v=4">
 </head>
 
 <body>
@@ -306,41 +306,71 @@
 
         </section>
 <!-- ROUTE AND QR SETUP -->
+<!-- ROUTE & QR SETUP -->
 
 <section
     id="routesSection"
     class="section hidden"
 >
 
-    <div class="panel">
+    <div class="route-hero">
 
-        <div class="section-header">
-
-            <div>
-                <h3>Route & QR Setup</h3>
-
-                <p>
-                    Assign five checkpoint QR codes and clues
-                    to each team.
-                </p>
+        <div>
+            <div class="route-kicker">
+                🗺 ROUTE CONFIGURATION
             </div>
+
+            <h2>Route & QR Setup</h2>
+
+            <p>
+                Configure the five checkpoints for each team.
+                Each checkpoint requires one QR code and one clue.
+            </p>
+        </div>
+
+        <div class="route-guide">
+
+            <strong>How it works</strong>
+
+            <span>
+                Clue → Find QR → Scan → Next Clue
+            </span>
 
         </div>
 
+    </div>
 
-        <label class="route-label">
-            Select Team
-        </label>
 
-        <select
-            id="routeTeamSelect"
-            class="route-select"
-            onchange="loadTeamRoute()"
-        >
-            <option value="">
-                Select a team
-            </option>
-        </select>
+    <div class="route-team-panel">
+
+        <div>
+
+            <label for="routeTeamSelect">
+                TEAM TO CONFIGURE
+            </label>
+
+            <select
+                id="routeTeamSelect"
+                onchange="loadTeamRoute()"
+            >
+
+                <option value="">
+                    Select a team...
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="route-team-info">
+
+            <span class="info-icon">ⓘ</span>
+
+            QR codes assigned here are the
+            exact QR codes that this team's
+            phone must scan during the hunt.
+
+        </div>
 
     </div>
 
@@ -350,14 +380,55 @@
         class="hidden"
     >
 
+        <div class="route-progress">
+
+            <div class="route-step">
+                <span>1</span>
+                <small>CP1</small>
+            </div>
+
+            <div class="route-line"></div>
+
+            <div class="route-step">
+                <span>2</span>
+                <small>CP2</small>
+            </div>
+
+            <div class="route-line"></div>
+
+            <div class="route-step">
+                <span>3</span>
+                <small>CP3</small>
+            </div>
+
+            <div class="route-line"></div>
+
+            <div class="route-step">
+                <span>4</span>
+                <small>CP4</small>
+            </div>
+
+            <div class="route-line"></div>
+
+            <div class="route-step">
+                <span>5</span>
+                <small>CP5</small>
+            </div>
+
+        </div>
+
+
         <div id="checkpointEditors"></div>
+
 
         <p
             id="routeMessage"
-            class="message"
+            class="message route-message"
         ></p>
 
     </div>
+
+</section>
 
 </section>
 
@@ -482,6 +553,7 @@
 
 <script src="./admin.js?v=6"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </body>
 
 </html>
