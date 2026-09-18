@@ -220,6 +220,103 @@ module.exports = async function handler(req, res) {
         });
     }
 
+    // ==========================================
+// RESET EVENT
+// ==========================================
+
+if (req.method === "PATCH") {
+
+    // Reset main event state
+    const {
+        error: eventResetError
+    } = await supabase
+        .from("event_config")
+        .update({
+            status: "waiting",
+            started_at: null
+        })
+        .eq("id", 1);
+
+
+    if (eventResetError) {
+
+        console.error(
+            "EVENT RESET ERROR:",
+            eventResetError
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Could not reset event."
+        });
+    }
+
+
+    // Reset team state
+    const {
+        error: teamResetError
+    } = await supabase
+        .from("teams")
+        .update({
+            current_checkpoint: 1,
+
+            active_session_token: null,
+
+            login_time: null,
+
+            camera_ready: false,
+
+            ready_at: null,
+
+            finished_at: null
+        })
+        .gte("id", 0);
+
+
+    if (teamResetError) {
+
+        console.error(
+            "TEAM RESET ERROR:",
+            teamResetError
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Event reset, but team reset failed."
+        });
+    }
+
+
+    // Delete checkpoint history
+    await supabase
+        .from("checkpoint_scans")
+        .delete()
+        .gte("id", 0);
+
+
+    // Delete final results
+    await supabase
+        .from("final_scans")
+        .delete()
+        .gte("id", 0);
+
+
+    // Delete failed / wrong QR attempts
+    await supabase
+        .from("scan_attempts")
+        .delete()
+        .gte("id", 0);
+
+
+    return res.status(200).json({
+        success: true,
+        message:
+            "Event has been reset."
+    });
+}
+
     return res.status(405).json({
         success: false
     });

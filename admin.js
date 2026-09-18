@@ -1,5 +1,5 @@
 let teams = [];
-
+let adminRefreshTimer = null;
 
 /* ============================
    PAGE STARTUP
@@ -115,20 +115,37 @@ async function adminLogin() {
 function showDashboard() {
 
     document
-        .getElementById(
-            "loginScreen"
-        )
+        .getElementById("loginScreen")
         .classList
         .add("hidden");
 
-
     document
-        .getElementById(
-            "dashboard"
-        )
+        .getElementById("dashboard")
         .classList
         .remove("hidden");
-    loadEventStatus();
+
+
+    // Load immediately
+    refreshAdminData();
+
+
+    // Refresh automatically every 2 seconds
+    if (!adminRefreshTimer) {
+
+        adminRefreshTimer = setInterval(
+            refreshAdminData,
+            2000
+        );
+    }
+}
+
+
+async function refreshAdminData() {
+
+    await Promise.all([
+        loadTeams(),
+        loadEventStatus()
+    ]);
 }
 
 
@@ -294,7 +311,7 @@ async function loadTeams() {
 
 
     renderTeams();
-    loadEventStatus();
+   
 }
 
 
@@ -1019,5 +1036,94 @@ async function startEvent() {
         message.innerText =
             "Could not start the event.";
 
+    }
+}
+async function resetEvent() {
+
+    const confirmed =
+        confirm(
+            "RESET THE TREASURE HUNT?\n\n" +
+
+            "This will:\n" +
+            "• Stop the current event\n" +
+            "• Clear checkpoint progress\n" +
+            "• Clear finish times\n" +
+            "• Log out all teams\n" +
+            "• Require camera verification again\n\n" +
+
+            "Registered teams will NOT be deleted."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const secondConfirm =
+        confirm(
+            "Are you sure?\n\n" +
+            "This action resets all current event progress."
+        );
+
+
+    if (!secondConfirm) {
+        return;
+    }
+
+
+    const message =
+        document.getElementById(
+            "eventMessage"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin-event",
+                {
+                    method: "PATCH"
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            message.className =
+                "message error";
+
+            message.innerText =
+                result.message ||
+                "Could not reset event.";
+
+            return;
+        }
+
+
+        message.className =
+            "message success";
+
+        message.innerText =
+            "✓ Event reset successfully. Teams may prepare for a new hunt.";
+
+
+        await refreshAdminData();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.className =
+            "message error";
+
+        message.innerText =
+            "Could not connect to server.";
     }
 }

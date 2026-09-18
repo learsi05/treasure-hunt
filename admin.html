@@ -7,7 +7,7 @@
 
     <title>Treasure Hunt Admin</title>
 
-    <link rel="stylesheet" href="./admin.css?v=1">
+    <link rel="stylesheet" href="./admin.css?v=2">
 </head>
 
 <body>
@@ -353,7 +353,18 @@
         >
             Waiting for all teams
         </button>
+        <button
+    id="resetEventButton"
+    class="reset-event-button"
+    onclick="resetEvent()"
+>
+    ↻ Reset Event
+</button>
 
+<p class="reset-warning">
+    Reset Event clears the current hunt progress
+    and returns the system to WAITING mode.
+</p>
         <p class="danger-note">
             The event can start only after all four teams
             complete login and camera verification.
@@ -410,7 +421,7 @@
 </div>
 
 
-<script src="./admin.js?v=5"></script>
+<script src="./admin.js?v=6"></script>
 
 </body>
 
