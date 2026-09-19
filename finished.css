@@ -1,0 +1,205 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    min-height: 100vh;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    background:
+        radial-gradient(
+            circle at top,
+            #5b3a17,
+            #241408 45%,
+            #0f0804
+        );
+
+    color: #3e2814;
+}
+
+
+.finish-wrapper {
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 25px;
+}
+
+
+.finish-card {
+    width: 100%;
+    max-width: 560px;
+
+    padding: 45px 32px;
+
+    text-align: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #f4e0b5,
+            #dfbd80
+        );
+
+    border:
+        4px double #795126;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 30px 80px
+        rgba(0, 0, 0, 0.6);
+}
+
+
+.finish-symbol {
+    font-size: 72px;
+
+    margin-bottom: 10px;
+}
+
+
+.finish-kicker {
+    color: #8a5a22;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    letter-spacing: 4px;
+
+    margin-bottom: 10px;
+}
+
+
+.finish-card h1 {
+    font-size: 42px;
+
+    color: #4b2b12;
+
+    margin-bottom: 8px;
+}
+
+
+.finish-card h2 {
+    color: #81501f;
+
+    font-size: 24px;
+}
+
+
+.finish-divider {
+    width: 90px;
+    height: 2px;
+
+    margin: 25px auto;
+
+    background: #8a5a22;
+}
+
+
+.finish-message {
+    line-height: 1.8;
+
+    font-size: 17px;
+}
+
+
+.finish-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 14px;
+
+    margin-top: 28px;
+}
+
+
+.finish-stat {
+    padding: 18px;
+
+    background:
+        rgba(255, 250, 230, 0.45);
+
+    border:
+        1px solid rgba(91, 58, 23, 0.25);
+
+    border-radius: 10px;
+}
+
+
+.finish-stat small {
+    display: block;
+
+    color: #8a5a22;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 7px;
+}
+
+
+.finish-stat strong {
+    color: #40240f;
+
+    font-family: monospace;
+
+    font-size: 20px;
+}
+
+
+.await-box {
+    margin-top: 25px;
+
+    padding: 17px;
+
+    background:
+        rgba(91, 58, 23, 0.08);
+
+    border-left:
+        4px solid #795126;
+
+    line-height: 1.6;
+}
+
+
+.finish-small {
+    margin-top: 20px;
+
+    color: #865c32;
+
+    font-size: 12px;
+}
+
+
+@media (max-width: 500px) {
+
+    .finish-card {
+        padding: 35px 20px;
+    }
+
+    .finish-card h1 {
+        font-size: 34px;
+    }
+
+    .finish-stats {
+        grid-template-columns: 1fr;
+    }
+}

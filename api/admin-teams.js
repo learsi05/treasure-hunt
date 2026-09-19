@@ -1,7 +1,5 @@
 const { createClient } =
-    require(
-        "@supabase/supabase-js"
-    );
+    require("@supabase/supabase-js");
 
 const crypto =
     require("crypto");
@@ -19,6 +17,10 @@ const supabase =
     );
 
 
+/* =========================================================
+   COOKIE
+========================================================= */
+
 function getCookie(
     req,
     name
@@ -26,6 +28,7 @@ function getCookie(
 
     const header =
         req.headers.cookie || "";
+
 
     for (
         const cookie
@@ -41,16 +44,22 @@ function getCookie(
                 .split("=");
 
 
-        if (key === name) {
+        if (
+            key === name
+        ) {
 
-            return values
-                .join("=");
+            return values.join("=");
         }
     }
+
 
     return null;
 }
 
+
+/* =========================================================
+   ADMIN AUTH
+========================================================= */
 
 function adminToken() {
 
@@ -66,7 +75,9 @@ function adminToken() {
 }
 
 
-function authorized(req) {
+function authorized(
+    req
+) {
 
     return (
         getCookie(
@@ -79,27 +90,53 @@ function authorized(req) {
 }
 
 
+/* =========================================================
+   MAIN HANDLER
+========================================================= */
+
 module.exports =
-async function handler(req, res) {
+async function handler(
+    req,
+    res
+) {
 
+    /* =====================================================
+       ADMIN SESSION
+    ===================================================== */
 
-    if (!authorized(req)) {
+    if (
+        !authorized(
+            req
+        )
+    ) {
 
         return res
             .status(401)
             .json({
-                success: false,
+
+                success:
+                    false,
 
                 message:
                     "Administrator session expired."
+
             });
     }
 
 
-    /* GET TEAMS */
+    res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate"
+    );
+
+
+    /* =====================================================
+       GET FINAL QR
+    ===================================================== */
 
     if (
-        req.method === "GET"
+        req.method ===
+        "GET"
     ) {
 
         const {
@@ -107,185 +144,56 @@ async function handler(req, res) {
             error
         } =
             await supabase
-                .from("teams")
+                .from(
+                    "event_config"
+                )
                 .select(`
-                    id,
-                    team_name,
-                    login_code,
-                    current_checkpoint,
-                    active_session_token,
-                    login_time,
-                    camera_ready,
-                    ready_at,
-                    finished_at
+                    status,
+                    final_qr_code
                 `)
-                .order(
-                    "id"
-                );
-
-
-        if (error) {
-
-            return res
-                .status(500)
-                .json({
-                    success: false,
-
-                    message:
-                        error.message
-                });
-        }
-
-
-        return res
-            .status(200)
-            .json({
-                success: true,
-
-                teams: data
-            });
-    }
-
-
-    /* CREATE TEAM */
-
-    if (
-        req.method === "POST"
-    ) {
-
-        const {
-            teamName,
-            loginCode
-        } =
-            req.body || {};
-
-
-        if (
-            !teamName ||
-            !loginCode
-        ) {
-
-            return res
-                .status(400)
-                .json({
-                    success: false,
-
-                    message:
-                        "Enter both team name and login code."
-                });
-        }
-
-
-        const {
-            count
-        } =
-            await supabase
-                .from("teams")
-                .select(
-                    "*",
-                    {
-                        count:
-                            "exact",
-
-                        head:
-                            true
-                    }
-                );
-
-
-        if (
-            count >= 4
-        ) {
-
-            return res
-                .status(400)
-                .json({
-                    success: false,
-
-                    message:
-                        "All four team slots are already registered."
-                });
-        }
-
-
-        const {
-            data,
-            error
-        } =
-            await supabase
-                .from("teams")
-                .insert([
-                    {
-                        team_name:
-                            teamName
-                                .trim(),
-
-                        login_code:
-                            loginCode
-                                .trim()
-                                .toUpperCase()
-                    }
-                ])
-                .select()
-                .single();
-
-
-        if (error) {
-
-            return res
-                .status(400)
-                .json({
-                    success: false,
-
-                    message:
-                        error.message
-                });
-        }
-
-
-        return res
-            .status(201)
-            .json({
-                success: true,
-
-                team: data
-            });
-    }
-
-
-    /* DELETE TEAM */
-
-    if (
-        req.method === "DELETE"
-    ) {
-
-        const {
-            teamId
-        } =
-            req.body || {};
-
-
-        const {
-            error
-        } =
-            await supabase
-                .from("teams")
-                .delete()
                 .eq(
                     "id",
-                    teamId
-                );
+                    1
+                )
+                .maybeSingle();
 
 
-        if (error) {
+        if (
+            error
+        ) {
+
+            console.error(
+                "LOAD FINAL QR ERROR:",
+                error
+            );
+
 
             return res
                 .status(500)
                 .json({
-                    success: false,
+
+                    success:
+                        false,
 
                     message:
-                        error.message
+                        "Could not load the final QR configuration."
+
+                });
+        }
+
+
+        if (!data) {
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Event configuration was not found."
+
                 });
         }
 
@@ -293,53 +201,255 @@ async function handler(req, res) {
         return res
             .status(200)
             .json({
-                success: true
+
+                success:
+                    true,
+
+                eventStatus:
+                    data.status,
+
+                finalQrCode:
+                    data.final_qr_code ||
+                    null
+
             });
     }
 
 
-    /* RESET LOGIN SESSION */
+    /* =====================================================
+       SAVE / UPDATE FINAL QR
+    ===================================================== */
 
     if (
-        req.method === "PATCH"
+        req.method ===
+        "POST"
     ) {
 
+        /* -------------------------------------------------
+           EVENT MUST BE WAITING
+        ------------------------------------------------- */
+
         const {
-            teamId
+            data: event,
+            error: eventError
+        } =
+            await supabase
+                .from(
+                    "event_config"
+                )
+                .select(`
+                    status,
+                    final_qr_code
+                `)
+                .eq(
+                    "id",
+                    1
+                )
+                .maybeSingle();
+
+
+        if (
+            eventError
+        ) {
+
+            console.error(
+                "FINAL QR EVENT CHECK ERROR:",
+                eventError
+            );
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Could not verify event status."
+
+                });
+        }
+
+
+        if (!event) {
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Event configuration was not found."
+
+                });
+        }
+
+
+        if (
+            event.status !==
+            "waiting"
+        ) {
+
+            return res
+                .status(409)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "The final QR can only be changed while the event is waiting. Reset the event first."
+
+                });
+        }
+
+
+        /* -------------------------------------------------
+           QR VALUE
+        ------------------------------------------------- */
+
+        const {
+            finalQrCode
         } =
             req.body || {};
 
 
+        const cleanCode =
+            String(
+                finalQrCode ||
+                ""
+            )
+                .trim();
+
+
+        if (!cleanCode) {
+
+            return res
+                .status(400)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Final QR value is required."
+
+                });
+        }
+
+
+        /* =================================================
+           MAKE SURE FINAL QR IS NOT USED BY ANY TEAM ROUTE
+        ================================================= */
+
         const {
-            error
+            data: existingRoute,
+            error: routeCheckError
         } =
             await supabase
-                .from("teams")
+                .from(
+                    "team_routes"
+                )
+                .select(`
+                    id,
+                    team_id,
+                    checkpoint_number
+                `)
+                .eq(
+                    "qr_code",
+                    cleanCode
+                )
+                .maybeSingle();
+
+
+        if (
+            routeCheckError
+        ) {
+
+            console.error(
+                "FINAL QR DUPLICATE CHECK ERROR:",
+                routeCheckError
+            );
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Could not verify whether this QR is already in use."
+
+                });
+        }
+
+
+        if (
+            existingRoute
+        ) {
+
+            return res
+                .status(400)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "This QR is already assigned to one of the team checkpoints. Use a different QR for the common final checkpoint."
+
+                });
+        }
+
+
+        /* =================================================
+           SAVE FINAL QR
+        ================================================= */
+
+        const {
+            error: updateError
+        } =
+            await supabase
+                .from(
+                    "event_config"
+                )
                 .update({
 
-                    active_session_token:
-                        null,
-
-                    login_time: null,
-                    camera_ready: false,
-                    ready_at: null
+                    final_qr_code:
+                        cleanCode
 
                 })
                 .eq(
                     "id",
-                    teamId
+                    1
                 );
 
 
-        if (error) {
+        if (
+            updateError
+        ) {
+
+            console.error(
+                "SAVE FINAL QR ERROR:",
+                updateError
+            );
+
 
             return res
                 .status(500)
                 .json({
-                    success: false,
+
+                    success:
+                        false,
 
                     message:
-                        error.message
+                        "Could not save the final QR."
+
                 });
         }
 
@@ -347,14 +457,33 @@ async function handler(req, res) {
         return res
             .status(200)
             .json({
-                success: true
+
+                success:
+                    true,
+
+                finalQrCode:
+                    cleanCode,
+
+                message:
+                    "Common Checkpoint 5 QR saved successfully."
+
             });
     }
 
 
+    /* =====================================================
+       METHOD NOT ALLOWED
+    ===================================================== */
+
     return res
         .status(405)
         .json({
-            success: false
+
+            success:
+                false,
+
+            message:
+                "Method not allowed."
+
         });
 };

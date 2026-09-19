@@ -14,7 +14,7 @@
 
     <link
         rel="stylesheet"
-        href="./hunt.css?v=3"
+        href="./hunt.css?v=4"
     >
 
 </head>
@@ -22,16 +22,23 @@
 
 <body>
 
+
 <div class="hunt-page">
 
 
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+
     <header class="hunt-header">
+
 
         <div>
 
             <small>
                 TREASURE HUNT
             </small>
+
 
             <h2 id="teamName">
                 Loading...
@@ -47,15 +54,19 @@
             ...
         </div>
 
+
     </header>
 
 
-    <!-- CLUE -->
+    <!-- =====================================================
+         CURRENT CLUE SCREEN
+    ===================================================== -->
 
     <section
         id="clueScreen"
         class="hunt-card"
     >
+
 
         <p class="clue-label">
             CURRENT OBJECTIVE
@@ -67,6 +78,8 @@
         </h1>
 
 
+        <!-- CLUE TEXT -->
+
         <div
             id="clueText"
             class="clue-box"
@@ -75,22 +88,63 @@
         </div>
 
 
+        <!-- OPTIONAL CLUE IMAGE -->
+
+        <div
+            id="clueImageWrapper"
+            class="clue-image-wrapper hidden"
+        >
+
+            <img
+                id="clueImage"
+                class="hunt-clue-image"
+                alt="Clue image"
+            >
+
+        </div>
+
+
+        <!-- =================================================
+             HINT + ANSWER
+
+             hunt.js will dynamically create:
+             - locked Hint button
+             - Hint countdown
+             - revealed Hint
+             - locked Answer button
+             - Answer countdown
+             - revealed Answer
+        ================================================= -->
+
+        <div
+            id="clueAssistanceMount"
+            class="assistance-mount"
+        ></div>
+
+
+        <!-- SCAN BUTTON -->
+
         <button
             id="scanButton"
+            class="scan-button"
             onclick="openScanner()"
         >
             📷 Scan QR
         </button>
 
+
     </section>
 
 
-    <!-- SCANNER -->
+    <!-- =====================================================
+         QR SCANNER
+    ===================================================== -->
 
     <section
         id="scannerScreen"
         class="hunt-card hidden"
     >
+
 
         <p class="clue-label">
             QR SCANNER
@@ -102,10 +156,24 @@
         </h1>
 
 
-        <div id="qr-reader"></div>
+        <p class="scanner-help">
+
+            Point your camera toward the QR code
+            and hold the phone steady.
+
+        </p>
 
 
-        <p id="scannerStatus">
+        <div
+            id="qr-reader"
+            class="qr-reader"
+        ></div>
+
+
+        <p
+            id="scannerStatus"
+            class="scanner-status"
+        >
             Point your camera at the QR code.
         </p>
 
@@ -114,18 +182,22 @@
             class="secondary-button"
             onclick="closeScanner()"
         >
-            Return to Clue
+            ← Return to Clue
         </button>
+
 
     </section>
 
 
-    <!-- RESULT -->
+    <!-- =====================================================
+         QR RESULT / NEW CLUE
+    ===================================================== -->
 
     <section
         id="resultScreen"
         class="hunt-card hidden"
     >
+
 
         <div
             id="resultIcon"
@@ -146,10 +218,61 @@
         ></p>
 
 
+        <!-- NEW CLUE AREA -->
+
         <div
-            id="nextClue"
-            class="clue-box"
-        ></div>
+            id="resultClueArea"
+            class="result-clue-area"
+        >
+
+
+            <p
+                id="newClueLabel"
+                class="clue-label"
+            >
+                YOUR NEXT CLUE
+            </p>
+
+
+            <div
+                id="nextClue"
+                class="clue-box"
+            ></div>
+
+
+            <!-- OPTIONAL NEW CLUE IMAGE -->
+
+            <div
+                id="nextClueImageWrapper"
+                class="clue-image-wrapper hidden"
+            >
+
+                <img
+                    id="nextClueImage"
+                    class="hunt-clue-image"
+                    alt="Next clue image"
+                >
+
+            </div>
+
+
+            <!--
+                Hint / Answer controls for
+                the newly revealed clue.
+
+                This is important because the
+                5-minute Hint timer starts
+                immediately when this clue
+                is revealed.
+            -->
+
+            <div
+                id="resultAssistanceMount"
+                class="assistance-mount"
+            ></div>
+
+
+        </div>
 
 
         <button
@@ -159,15 +282,30 @@
             Continue
         </button>
 
+
     </section>
 
 
 </div>
 
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+<!-- =====================================================
+     QR SCANNER LIBRARY
+===================================================== -->
 
-<script src="./hunt.js?v=4"></script>
+<script
+    src="https://unpkg.com/html5-qrcode"
+></script>
+
+
+<!-- =====================================================
+     HUNT SCRIPT
+===================================================== -->
+
+<script
+    src="./hunt.js?v=5"
+></script>
+
 
 </body>
 

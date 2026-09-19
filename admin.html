@@ -3,31 +3,59 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Treasure Hunt Admin</title>
 
-    <link rel="stylesheet" href="./admin.css?v=4">
+    <link
+        rel="stylesheet"
+        href="./admin.css?v=5"
+    >
 </head>
+
 
 <body>
 
-<div id="loginScreen" class="login-screen">
+
+<!-- =====================================================
+     ADMIN LOGIN
+===================================================== -->
+
+<div
+    id="loginScreen"
+    class="login-screen"
+>
 
     <div class="login-card">
 
-        <div class="admin-symbol">⚔</div>
+        <div class="admin-symbol">
+            ⚔
+        </div>
+
 
         <p class="small-title">
             TREASURE HUNT
         </p>
 
-        <h1>Admin Control</h1>
+
+        <h1>
+            Admin Control
+        </h1>
+
 
         <p class="login-description">
+
             Authorized event coordinators only.
-            Enter the administrator password to access the control room.
+
+            Enter the administrator password
+            to access the control room.
+
         </p>
+
 
         <input
             type="password"
@@ -35,32 +63,64 @@
             placeholder="Administrator Password"
         >
 
-        <button onclick="adminLogin()">
+
+        <button
+            onclick="adminLogin()"
+        >
             Enter Control Room
         </button>
 
-        <p id="loginMessage" class="message"></p>
+
+        <p
+            id="loginMessage"
+            class="message"
+        ></p>
 
     </div>
 
 </div>
 
 
-<div id="dashboard" class="dashboard hidden">
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<div
+    id="dashboard"
+    class="dashboard hidden"
+>
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================= -->
 
     <aside class="sidebar">
 
+
         <div class="brand">
-            <span>☠</span>
+
+            <span>
+                ☠
+            </span>
 
             <div>
-                <strong>Treasure Hunt</strong>
-                <small>Control Room</small>
+
+                <strong>
+                    Treasure Hunt
+                </strong>
+
+                <small>
+                    Control Room
+                </small>
+
             </div>
+
         </div>
 
 
         <nav>
+
 
             <button
                 class="nav-button active"
@@ -69,24 +129,30 @@
                 🏠 Overview
             </button>
 
+
             <button
                 class="nav-button"
                 onclick="showSection('teams', this)"
             >
                 👥 Manage Teams
             </button>
+
+
             <button
-    class="nav-button"
-    onclick="showSection('routes', this)"
->
-    🗺 Route & QR Setup
-</button>
+                class="nav-button"
+                onclick="showSection('routes', this)"
+            >
+                🗺 Route & QR Setup
+            </button>
+
+
             <button
                 class="nav-button"
                 onclick="showSection('event', this)"
             >
                 ⚡ Event Control
             </button>
+
 
             <button
                 class="nav-button"
@@ -95,12 +161,14 @@
                 🧭 Live Progress
             </button>
 
+
             <button
                 class="nav-button"
                 onclick="showSection('results', this)"
             >
                 🏆 Results
             </button>
+
 
         </nav>
 
@@ -112,20 +180,34 @@
             Logout
         </button>
 
+
     </aside>
 
 
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================= -->
+
     <main class="main-content">
+
+
+        <!-- TOP BAR -->
 
         <header class="topbar">
 
             <div>
-                <h2 id="pageTitle">Overview</h2>
+
+                <h2 id="pageTitle">
+                    Overview
+                </h2>
 
                 <p>
-                    Treasure Hunt administration and monitoring
+                    Treasure Hunt administration
+                    and monitoring
                 </p>
+
             </div>
+
 
             <div class="admin-badge">
                 ADMIN
@@ -134,59 +216,144 @@
         </header>
 
 
-        <!-- OVERVIEW -->
+        <!-- =================================================
+             OVERVIEW
+        ================================================= -->
 
-        <section id="overviewSection" class="section">
+        <section
+            id="overviewSection"
+            class="section"
+        >
+
 
             <div class="stats-grid">
 
-                <div class="stat-card">
-                    <span>👥</span>
-                    <div>
-                        <small>Registered Teams</small>
-                        <h3 id="overviewTeams">0 / 4</h3>
-                    </div>
-                </div>
 
                 <div class="stat-card">
-                    <span>⚡</span>
+
+                    <span>
+                        👥
+                    </span>
+
                     <div>
-                        <small>Event Status</small>
-                        <h3 id="overviewStatus">Waiting</h3>
+
+                        <small>
+                            Registered Teams
+                        </small>
+
+                        <h3 id="overviewTeams">
+                            0 / 4
+                        </h3>
+
                     </div>
+
                 </div>
 
+
                 <div class="stat-card">
-                    <span>🏁</span>
+
+                    <span>
+                        ⚡
+                    </span>
+
                     <div>
-                        <small>Teams Finished</small>
-                        <h3 id="overviewFinished">0</h3>
+
+                        <small>
+                            Event Status
+                        </small>
+
+                        <h3 id="overviewStatus">
+                            Waiting
+                        </h3>
+
                     </div>
+
                 </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        🏁
+                    </span>
+
+                    <div>
+
+                        <small>
+                            Teams Finished
+                        </small>
+
+                        <h3 id="overviewFinished">
+                            0
+                        </h3>
+
+                    </div>
+
+                </div>
+
 
             </div>
 
 
             <div class="panel">
 
-                <h3>Control Center</h3>
+
+                <h3>
+                    Control Center
+                </h3>
+
 
                 <p class="panel-description">
-                    Select an area below to manage the event.
+
+                    Select an area below
+                    to manage the event.
+
                 </p>
 
 
                 <div class="action-grid">
 
+
                     <button
                         class="action-card"
                         onclick="openSection('teams')"
                     >
-                        <span>👥</span>
-                        <strong>Manage Teams</strong>
+
+                        <span>
+                            👥
+                        </span>
+
+                        <strong>
+                            Manage Teams
+                        </strong>
+
                         <small>
-                            Add, remove, or reset team login sessions
+                            Add, remove, or reset
+                            team login sessions
                         </small>
+
+                    </button>
+
+
+                    <button
+                        class="action-card"
+                        onclick="openSection('routes')"
+                    >
+
+                        <span>
+                            🗺
+                        </span>
+
+                        <strong>
+                            Route & QR Setup
+                        </strong>
+
+                        <small>
+                            Configure QR codes,
+                            clues, images, hints
+                            and answers
+                        </small>
+
                     </button>
 
 
@@ -194,11 +361,20 @@
                         class="action-card"
                         onclick="openSection('event')"
                     >
-                        <span>⚡</span>
-                        <strong>Event Control</strong>
+
+                        <span>
+                            ⚡
+                        </span>
+
+                        <strong>
+                            Event Control
+                        </strong>
+
                         <small>
-                            Start or monitor the treasure hunt
+                            Start or reset
+                            the treasure hunt
                         </small>
+
                     </button>
 
 
@@ -206,11 +382,20 @@
                         class="action-card"
                         onclick="openSection('progress')"
                     >
-                        <span>🧭</span>
-                        <strong>Live Progress</strong>
+
+                        <span>
+                            🧭
+                        </span>
+
+                        <strong>
+                            Live Progress
+                        </strong>
+
                         <small>
-                            Track checkpoints and completion times
+                            Track checkpoints
+                            and completion times
                         </small>
+
                     </button>
 
 
@@ -218,12 +403,22 @@
                         class="action-card"
                         onclick="openSection('results')"
                     >
-                        <span>🏆</span>
-                        <strong>Results</strong>
+
+                        <span>
+                            🏆
+                        </span>
+
+                        <strong>
+                            Results
+                        </strong>
+
                         <small>
-                            View winner and runner-up
+                            View winner,
+                            runner-up and finish order
                         </small>
+
                     </button>
+
 
                 </div>
 
@@ -232,25 +427,36 @@
         </section>
 
 
-        <!-- TEAM MANAGEMENT -->
+        <!-- =================================================
+             TEAM MANAGEMENT
+        ================================================= -->
 
         <section
             id="teamsSection"
             class="section hidden"
         >
 
+
             <div class="panel">
+
 
                 <div class="section-header">
 
+
                     <div>
-                        <h3>Team Management</h3>
+
+                        <h3>
+                            Team Management
+                        </h3>
 
                         <p>
                             Register up to four teams.
-                            Each team receives a unique login code.
+                            Each team receives a unique
+                            login code.
                         </p>
+
                     </div>
+
 
                     <div
                         id="teamCount"
@@ -259,10 +465,12 @@
                         0 / 4
                     </div>
 
+
                 </div>
 
 
                 <div class="form-grid">
+
 
                     <input
                         id="teamName"
@@ -270,11 +478,13 @@
                         placeholder="Team Name"
                     >
 
+
                     <input
                         id="loginCode"
                         type="text"
                         placeholder="Team Login Code"
                     >
+
 
                     <button
                         class="primary-button"
@@ -283,474 +493,803 @@
                         + Register Team
                     </button>
 
+
                 </div>
 
-                <p id="teamMessage" class="message"></p>
+
+                <p
+                    id="teamMessage"
+                    class="message"
+                ></p>
+
 
             </div>
 
 
             <div class="panel">
 
-                <h3>Registered Teams</h3>
+
+                <h3>
+                    Registered Teams
+                </h3>
+
 
                 <p class="panel-description">
-                    Reset Login is useful if a team leader loses
-                    their browser session. Their checkpoint progress
+
+                    Reset Login is useful if a team
+                    leader loses their browser session.
+
+                    Their checkpoint progress
                     will not be deleted.
+
                 </p>
+
 
                 <div id="teamList"></div>
 
+
             </div>
+
 
         </section>
-<!-- =====================================================
-     ROUTE & QR SETUP
-===================================================== -->
 
-<section
-    id="routesSection"
-    class="section hidden"
->
 
-    <div class="route-hero">
-
-        <div>
-
-            <div class="route-kicker">
-                🗺 ROUTE CONFIGURATION
-            </div>
-
-            <h2>
-                Route & QR Setup
-            </h2>
-
-            <p>
-                Configure each team's starting QR and four
-                route checkpoints.
-            </p>
-
-        </div>
-
-
-        <div class="route-guide">
-
-            <strong>
-                Hunt Flow
-            </strong>
-
-            <span>
-                START QR → CP1 → CP2 → CP3 → CP4 → COMMON CP5
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <!-- TEAM SELECT -->
-
-    <div class="route-team-panel">
-
-        <div>
-
-            <label for="routeTeamSelect">
-                TEAM TO CONFIGURE
-            </label>
-
-            <select
-                id="routeTeamSelect"
-                onchange="loadTeamRoute()"
-            >
-
-                <option value="">
-                    Select a team...
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <div class="route-team-info">
-
-            <span class="info-icon">
-                ⓘ
-            </span>
-
-            Every team has its own Start QR and
-            Checkpoints 1–4.
-
-            Checkpoint 5 is shared by all teams.
-
-        </div>
-
-    </div>
-
-
-    <!-- TEAM ROUTE -->
-
-    <div
-        id="routeEditor"
-        class="hidden"
-    >
-
-        <div class="route-progress">
-
-            <div class="route-step">
-                <span>S</span>
-                <small>START</small>
-            </div>
-
-            <div class="route-line"></div>
-
-            <div class="route-step">
-                <span>1</span>
-                <small>CP1</small>
-            </div>
-
-            <div class="route-line"></div>
-
-            <div class="route-step">
-                <span>2</span>
-                <small>CP2</small>
-            </div>
-
-            <div class="route-line"></div>
-
-            <div class="route-step">
-                <span>3</span>
-                <small>CP3</small>
-            </div>
-
-            <div class="route-line"></div>
-
-            <div class="route-step">
-                <span>4</span>
-                <small>CP4</small>
-            </div>
-
-            <div class="route-line"></div>
-
-            <div class="route-step final-step">
-                <span>🏁</span>
-                <small>CP5</small>
-            </div>
-
-        </div>
-
-
-        <div id="checkpointEditors"></div>
-
-
-        <p
-            id="routeMessage"
-            class="message route-message"
-        ></p>
-
-    </div>
-
-
-    <!-- COMMON FINAL QR -->
-
-    <div class="final-qr-card">
-
-        <div class="final-header">
-
-            <div>
-
-                <div class="route-kicker">
-                    🏁 COMMON FINAL CHECKPOINT
-                </div>
-
-                <h2>
-                    Checkpoint 5
-                </h2>
-
-            </div>
-
-            <span class="common-badge">
-                ALL TEAMS
-            </span>
-
-        </div>
-
-
-        <p class="final-description">
-
-            This is the 21st QR.
-
-            All teams eventually reach this same QR.
-            A team can finish only after completing its
-            Start QR and Checkpoints 1–4.
-
-        </p>
-
-
-        <div class="final-grid">
-
-            <div class="qr-config-panel">
-
-                <div class="config-label">
-                    📷 Common Final QR
-                </div>
-
-                <div class="config-help">
-                    Upload the QR that will physically
-                    be placed at the treasure/final location.
-                </div>
-
-
-                <div class="qr-drop-zone">
-
-                    <img
-                        id="finalQrPreview"
-                        class="qr-preview"
-                    >
-
-                    <input
-                        type="file"
-                        accept="image/*"
-                        class="qr-file-input"
-                        onchange="decodeFinalQR(event)"
-                    >
-
-                </div>
-
-
-                <div class="decoded-wrapper">
-
-                    <span class="decoded-label">
-                        Decoded QR Value
-                    </span>
-
-                    <div
-                        id="finalQrValue"
-                        class="qr-value"
-                    >
-                        No final QR configured
-                    </div>
-
-                </div>
-
-
-                <input
-                    id="finalQrManual"
-                    class="qr-manual-input"
-                    type="text"
-                    placeholder="Final QR value"
-                >
-
-            </div>
-
-
-            <div class="final-explanation">
-
-                <h3>
-                    How CP5 works
-                </h3>
-
-                <p>
-                    After a team's Checkpoint 4 QR is
-                    successfully scanned, its final clue
-                    will be revealed.
-                </p>
-
-                <p>
-                    The team follows that clue and races
-                    toward this common QR.
-                </p>
-
-                <p>
-                    The server accepts the QR only if that
-                    team has completed its entire route.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <button
-            class="save-final-button"
-            onclick="saveFinalQR()"
-        >
-            Save Common Checkpoint 5 QR
-        </button>
-
-
-        <p
-            id="finalQrMessage"
-            class="message"
-        ></p>
-
-    </div>
-
-</section>
-
-</section>
-
-        <!-- EVENT -->
+        <!-- =================================================
+             ROUTE & QR SETUP
+        ================================================= -->
 
         <section
-    id="eventSection"
-    class="section hidden"
->
-
-    <div class="panel">
-
-        <h3>Event Control</h3>
-
-        <p class="panel-description">
-            Ensure all four team leaders are logged in
-            and have successfully completed the camera check
-            before starting the hunt.
-        </p>
-
-        <div class="event-status-box">
-
-            <span>Current Event Status</span>
-
-            <strong id="eventStatus">
-                WAITING
-            </strong>
-
-        </div>
-
-        <h4 style="margin-top: 25px; margin-bottom: 15px;">
-            Team Readiness
-        </h4>
-
-        <div
-            id="readyTeamList"
-            class="ready-team-list"
+            id="routesSection"
+            class="section hidden"
         >
-            Loading teams...
-        </div>
 
-        <p
-            id="eventMessage"
-            class="message"
-        ></p>
 
-        <button
-            id="startEventButton"
-            class="start-event-button"
-            onclick="startEvent()"
-            disabled
-        >
-            Waiting for all teams
-        </button>
-        <button
-    id="resetEventButton"
-    class="reset-event-button"
-    onclick="resetEvent()"
->
-    ↻ Reset Event
-</button>
+            <!-- ROUTE HEADER -->
 
-<p class="reset-warning">
-    Reset Event clears the current hunt progress
-    and returns the system to WAITING mode.
-</p>
-        <p class="danger-note">
-            The event can start only after all four teams
-            complete login and camera verification.
-        </p>
+            <div class="route-hero">
 
-    </div>
 
-</section>
+                <div>
 
-<!-- LIVE PROGRESS -->
 
-<section
-    id="progressSection"
-    class="section hidden"
->
+                    <div class="route-kicker">
+                        🗺 ROUTE CONFIGURATION
+                    </div>
 
-    <div class="live-progress-header">
 
-        <div>
+                    <h2>
+                        Route & QR Setup
+                    </h2>
 
-            <div class="route-kicker">
-                🧭 LIVE MONITORING
+
+                    <p>
+
+                        Configure each team's Start QR
+                        and Checkpoints 1–4.
+
+                        Each stage can contain a clue,
+                        optional image, hint and answer.
+
+                    </p>
+
+
+                </div>
+
+
+                <div class="route-guide">
+
+
+                    <strong>
+                        Hunt Flow
+                    </strong>
+
+
+                    <span>
+
+                        START QR
+                        →
+                        CP1
+                        →
+                        CP2
+                        →
+                        CP3
+                        →
+                        CP4
+                        →
+                        COMMON CP5
+
+                    </span>
+
+
+                </div>
+
+
             </div>
 
-            <h2>
-                Team Progress
-            </h2>
 
-            <p>
-                Checkpoint activity updates automatically.
-                No page refresh is required.
-            </p>
+            <!-- TEAM SELECTOR -->
 
-        </div>
+            <div class="route-team-panel">
 
 
-        <div class="live-event-box">
-
-            <small>
-                EVENT STATUS
-            </small>
-
-            <strong id="liveEventStatus">
-                WAITING
-            </strong>
-
-            <span id="liveEventTimer">
-                00:00:00
-            </span>
-
-        </div>
-
-    </div>
+                <div>
 
 
-    <div
-        id="liveProgressGrid"
-        class="live-progress-grid"
-    >
+                    <label for="routeTeamSelect">
 
-        <div class="progress-loading">
-            Loading team progress...
-        </div>
+                        TEAM TO CONFIGURE
 
-    </div>
-
-</section>
+                    </label>
 
 
-        <!-- RESULTS -->
+                    <select
+                        id="routeTeamSelect"
+                        onchange="loadTeamRoute()"
+                    >
+
+                        <option value="">
+                            Select a team...
+                        </option>
+
+                    </select>
+
+
+                </div>
+
+
+                <div class="route-team-info">
+
+                    <span class="info-icon">
+                        ⓘ
+                    </span>
+
+                    Every team has its own
+                    Start QR and Checkpoints 1–4.
+
+                    The common Checkpoint 5 QR
+                    is shared by all teams.
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ROUTE EDITOR -->
+
+            <div
+                id="routeEditor"
+                class="hidden"
+            >
+
+
+                <!-- ROUTE TIMELINE -->
+
+                <div class="route-progress">
+
+
+                    <div class="route-step">
+
+                        <span>
+                            S
+                        </span>
+
+                        <small>
+                            START
+                        </small>
+
+                    </div>
+
+
+                    <div class="route-line"></div>
+
+
+                    <div class="route-step">
+
+                        <span>
+                            1
+                        </span>
+
+                        <small>
+                            CP1
+                        </small>
+
+                    </div>
+
+
+                    <div class="route-line"></div>
+
+
+                    <div class="route-step">
+
+                        <span>
+                            2
+                        </span>
+
+                        <small>
+                            CP2
+                        </small>
+
+                    </div>
+
+
+                    <div class="route-line"></div>
+
+
+                    <div class="route-step">
+
+                        <span>
+                            3
+                        </span>
+
+                        <small>
+                            CP3
+                        </small>
+
+                    </div>
+
+
+                    <div class="route-line"></div>
+
+
+                    <div class="route-step">
+
+                        <span>
+                            4
+                        </span>
+
+                        <small>
+                            CP4
+                        </small>
+
+                    </div>
+
+
+                    <div class="route-line"></div>
+
+
+                    <div class="route-step final-step">
+
+                        <span>
+                            🏁
+                        </span>
+
+                        <small>
+                            CP5
+                        </small>
+
+                    </div>
+
+
+                </div>
+
+
+                <!--
+                    IMPORTANT:
+
+                    QR + clue + optional image +
+                    hint + answer cards are created
+                    dynamically by admin.js.
+                -->
+
+                <div id="checkpointEditors"></div>
+
+
+                <p
+                    id="routeMessage"
+                    class="message route-message"
+                ></p>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 COMMON FINAL QR
+            ================================================= -->
+
+            <div class="final-qr-card">
+
+
+                <div class="final-header">
+
+
+                    <div>
+
+
+                        <div class="route-kicker">
+
+                            🏁 COMMON FINAL CHECKPOINT
+
+                        </div>
+
+
+                        <h2>
+                            Checkpoint 5
+                        </h2>
+
+
+                    </div>
+
+
+                    <span class="common-badge">
+                        ALL TEAMS
+                    </span>
+
+
+                </div>
+
+
+                <p class="final-description">
+
+                    This is the 21st QR.
+
+                    All teams eventually reach this
+                    same final checkpoint.
+
+                    A team may finish only after
+                    completing its Start QR
+                    and Checkpoints 1–4.
+
+                </p>
+
+
+                <div class="final-grid">
+
+
+                    <!-- FINAL QR -->
+
+                    <div class="qr-config-panel">
+
+
+                        <div class="config-label">
+                            📷 Common Final QR
+                        </div>
+
+
+                        <div class="config-help">
+
+                            Upload the QR that will
+                            physically be placed at the
+                            treasure/final location.
+
+                        </div>
+
+
+                        <div class="qr-drop-zone">
+
+
+                            <img
+                                id="finalQrPreview"
+                                class="qr-preview"
+                                alt="Final QR Preview"
+                            >
+
+
+                            <input
+                                type="file"
+                                accept="image/*"
+                                class="qr-file-input"
+                                onchange="decodeFinalQR(event)"
+                            >
+
+
+                        </div>
+
+
+                        <div class="decoded-wrapper">
+
+
+                            <span class="decoded-label">
+                                Decoded QR Value
+                            </span>
+
+
+                            <div
+                                id="finalQrValue"
+                                class="qr-value"
+                            >
+                                No final QR configured
+                            </div>
+
+
+                        </div>
+
+
+                        <input
+                            id="finalQrManual"
+                            class="qr-manual-input"
+                            type="text"
+                            placeholder="Final QR value"
+                        >
+
+
+                    </div>
+
+
+                    <!-- FINAL EXPLANATION -->
+
+                    <div class="final-explanation">
+
+
+                        <h3>
+                            How Checkpoint 5 works
+                        </h3>
+
+
+                        <p>
+
+                            After a team's Checkpoint 4 QR
+                            is successfully scanned,
+                            its final clue is revealed.
+
+                        </p>
+
+
+                        <p>
+
+                            The team follows the clue
+                            and races toward the common
+                            final checkpoint.
+
+                        </p>
+
+
+                        <p>
+
+                            The final QR is accepted only
+                            after that team has completed
+                            its full route.
+
+                        </p>
+
+
+                        <p>
+
+                            The server-recorded final scan
+                            time determines the team's
+                            finishing position.
+
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <button
+                    class="save-final-button"
+                    onclick="saveFinalQR()"
+                >
+                    Save Common Checkpoint 5 QR
+                </button>
+
+
+                <p
+                    id="finalQrMessage"
+                    class="message"
+                ></p>
+
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             EVENT CONTROL
+        ================================================= -->
+
+        <section
+            id="eventSection"
+            class="section hidden"
+        >
+
+
+            <div class="panel">
+
+
+                <h3>
+                    Event Control
+                </h3>
+
+
+                <p class="panel-description">
+
+                    Ensure all four routes are configured
+                    and every team leader has completed
+                    the camera check before starting.
+
+                </p>
+
+
+                <div class="event-status-box">
+
+
+                    <span>
+                        Current Event Status
+                    </span>
+
+
+                    <strong id="eventStatus">
+                        WAITING
+                    </strong>
+
+
+                </div>
+
+
+                <h4
+                    style="
+                        margin-top: 25px;
+                        margin-bottom: 15px;
+                    "
+                >
+                    Team Readiness
+                </h4>
+
+
+                <div
+                    id="readyTeamList"
+                    class="ready-team-list"
+                >
+                    Loading teams...
+                </div>
+
+
+                <p
+                    id="eventMessage"
+                    class="message"
+                ></p>
+
+
+                <button
+                    id="startEventButton"
+                    class="start-event-button"
+                    onclick="startEvent()"
+                    disabled
+                >
+                    Waiting for all teams
+                </button>
+
+
+                <button
+                    id="resetEventButton"
+                    class="reset-event-button"
+                    onclick="resetEvent()"
+                >
+                    ↻ Reset Event
+                </button>
+
+
+                <p class="reset-warning">
+
+                    Reset Event clears the current
+                    hunt progress and returns the
+                    system to WAITING mode.
+
+                    Team route configuration
+                    remains saved.
+
+                </p>
+
+
+                <p class="danger-note">
+
+                    The event can start only after
+                    all four teams complete login,
+                    camera verification and
+                    route configuration.
+
+                </p>
+
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             LIVE PROGRESS
+        ================================================= -->
+
+        <section
+            id="progressSection"
+            class="section hidden"
+        >
+
+
+            <div class="live-progress-header">
+
+
+                <div>
+
+
+                    <div class="route-kicker">
+                        🧭 LIVE MONITORING
+                    </div>
+
+
+                    <h2>
+                        Team Progress
+                    </h2>
+
+
+                    <p>
+
+                        Checkpoint activity updates
+                        automatically.
+
+                        No page refresh is required.
+
+                    </p>
+
+
+                </div>
+
+
+                <div class="live-event-box">
+
+
+                    <small>
+                        EVENT STATUS
+                    </small>
+
+
+                    <strong id="liveEventStatus">
+                        WAITING
+                    </strong>
+
+
+                    <span id="liveEventTimer">
+                        00:00:00
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+            <div
+                id="liveProgressGrid"
+                class="live-progress-grid"
+            >
+
+                <div class="progress-loading">
+
+                    Loading team progress...
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             RESULTS
+        ================================================= -->
 
         <section
             id="resultsSection"
             class="section hidden"
         >
 
-            <div class="panel">
 
-                <h3>Event Results</h3>
+            <div class="results-hero">
 
-                <p>
-                    Winner and runner-up will appear here after
-                    teams scan the final QR.
-                </p>
+
+                <div>
+
+
+                    <div class="route-kicker">
+                        🏆 TREASURE HUNT RESULTS
+                    </div>
+
+
+                    <h2>
+                        Final Standings
+                    </h2>
+
+
+                    <p>
+
+                        Rankings are calculated
+                        directly from server-recorded
+                        final scan times.
+
+                    </p>
+
+
+                </div>
+
+
+                <div
+                    id="resultsEventStatus"
+                    class="results-status"
+                >
+                    EVENT IN PROGRESS
+                </div>
+
 
             </div>
 
+
+            <div
+                id="podiumArea"
+                class="podium-area"
+            >
+
+                Waiting for the first finisher...
+
+            </div>
+
+
+            <div class="results-table-card">
+
+
+                <div class="results-table-title">
+
+
+                    <h3>
+                        Finish Order
+                    </h3>
+
+
+                    <span>
+                        Server timestamps
+                    </span>
+
+
+                </div>
+
+
+                <div
+                    id="resultsTable"
+                    class="results-table"
+                ></div>
+
+
+            </div>
+
+
         </section>
 
+
     </main>
+
 
 </div>
 
 
-<script src="./admin.js?v=6"></script>
+<!-- =====================================================
+     LIBRARIES
+===================================================== -->
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<!--
+    QR image decoder MUST load before admin.js
+-->
+<script
+    src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"
+></script>
+
+
+<!-- =====================================================
+     ADMIN SCRIPT
+===================================================== -->
+
+<script
+    src="./admin.js?v=7"
+></script>
+
+
 </body>
 
 </html>

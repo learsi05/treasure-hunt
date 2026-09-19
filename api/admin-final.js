@@ -143,7 +143,29 @@ async function handler(
     if (
         req.method === "POST"
     ) {
+        const {
+    data: event
+} = await supabase
+    .from("event_config")
+    .select("status")
+    .eq("id", 1)
+    .single();
 
+
+if (
+    event.status !==
+    "waiting"
+) {
+
+    return res
+        .status(409)
+        .json({
+            success: false,
+
+            message:
+                "Routes cannot be edited while the event is running. Reset the event first."
+        });
+}
         const {
             finalQrCode
         } =

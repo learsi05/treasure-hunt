@@ -1,3 +1,7 @@
+/* =========================================================
+   GLOBAL
+========================================================= */
+
 * {
     margin: 0;
     padding: 0;
@@ -5,82 +9,140 @@
 }
 
 
+html {
+    scroll-behavior: smooth;
+}
+
+
 body {
+
+    min-height: 100vh;
 
     font-family:
         Georgia,
         "Times New Roman",
         serif;
 
-    min-height: 100vh;
-
     background:
-        linear-gradient(
-            135deg,
-            #2c1a0d,
-            #120b06
+        radial-gradient(
+            circle at top,
+            #4a2b13,
+            #2c1a0d 35%,
+            #120b06 75%
         );
 
     color: #3b2513;
 }
 
 
+/* =========================================================
+   PAGE
+========================================================= */
+
 .hunt-page {
 
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
+
+    min-height: 100vh;
 
     margin: auto;
 
     padding: 20px;
-
-    min-height: 100vh;
 }
 
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 .hunt-header {
 
     display: flex;
 
-    justify-content:
-        space-between;
-
+    justify-content: space-between;
     align-items: center;
 
-    color: white;
+    gap: 15px;
 
     margin-bottom: 20px;
+
+    color: white;
 }
 
 
 .hunt-header small {
 
+    display: block;
+
+    margin-bottom: 5px;
+
     color: #d6a85f;
+
+    font-size: 11px;
+
+    font-weight: bold;
 
     letter-spacing: 2px;
 }
 
 
-.checkpoint-pill {
+.hunt-header h2 {
 
-    background: #d49b42;
+    font-size: 23px;
 
-    color: #1e1208;
-
-    padding: 9px 15px;
-
-    border-radius: 30px;
-
-    font-weight: bold;
+    line-height: 1.2;
 }
 
 
-.hunt-card {
+.checkpoint-pill {
+
+    flex-shrink: 0;
+
+    padding: 9px 15px;
 
     background:
         linear-gradient(
-            #f2ddb1,
-            #dfbd82
+            135deg,
+            #e1ad55,
+            #c9852f
+        );
+
+    color: #1e1208;
+
+    border:
+        1px solid #e4b96e;
+
+    border-radius: 30px;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    box-shadow:
+        0 5px 15px
+        rgba(0, 0, 0, 0.22);
+}
+
+
+/* =========================================================
+   MAIN PARCHMENT CARD
+========================================================= */
+
+.hunt-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 30px 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #f4e3bd,
+            #e8ca91 55%,
+            #dcb779
         );
 
     border:
@@ -88,62 +150,152 @@ body {
 
     border-radius: 16px;
 
-    padding: 30px 24px;
-
     box-shadow:
         0 20px 50px
-        rgba(0,0,0,.5);
+        rgba(0, 0, 0, 0.5);
 
     text-align: center;
 }
 
 
+.hunt-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 7px;
+
+    pointer-events: none;
+
+    border:
+        1px solid
+        rgba(111, 67, 25, 0.18);
+
+    border-radius: 10px;
+}
+
+
+.hunt-card > * {
+
+    position: relative;
+
+    z-index: 1;
+}
+
+
+/* =========================================================
+   CLUE
+========================================================= */
+
 .clue-label {
+
+    margin-bottom: 10px;
 
     color: #815827;
 
-    font-size: 12px;
+    font-size: 11px;
+
+    font-weight: bold;
 
     letter-spacing: 3px;
-
-    margin-bottom: 10px;
 }
 
 
 .hunt-card h1 {
 
+    margin-bottom: 22px;
+
     color: #4a2a10;
 
-    margin-bottom: 22px;
+    font-size: 30px;
+
+    line-height: 1.25;
 }
 
 
 .clue-box {
+
+    margin: 20px 0;
+
+    padding: 22px;
 
     background:
         rgba(
             255,
             248,
             225,
-            .55
+            0.62
         );
+
+    color: #3f2814;
 
     border-left:
         5px solid #865625;
 
     border-radius: 8px;
 
-    padding: 24px;
+    box-shadow:
+        inset 0 0 20px
+        rgba(88, 52, 20, 0.05);
 
-    margin: 20px 0;
-
-    line-height: 1.8;
+    text-align: left;
 
     font-size: 18px;
 
-    text-align: left;
+    line-height: 1.8;
+
+    white-space: pre-wrap;
 }
 
+
+/* =========================================================
+   OPTIONAL CLUE IMAGE
+========================================================= */
+
+.clue-image-wrapper {
+
+    margin:
+        5px 0 22px;
+
+    padding: 8px;
+
+    background:
+        rgba(
+            255,
+            248,
+            225,
+            0.55
+        );
+
+    border:
+        2px solid #9b6a32;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 8px 20px
+        rgba(76, 43, 16, 0.14);
+}
+
+
+.hunt-clue-image {
+
+    display: block;
+
+    width: 100%;
+
+    max-height: 360px;
+
+    object-fit: contain;
+
+    border-radius: 6px;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
 
 button {
 
@@ -151,13 +303,18 @@ button {
 
     padding: 15px;
 
+    background:
+        linear-gradient(
+            135deg,
+            #704116,
+            #5c3211
+        );
+
+    color: #f8e5bd;
+
     border: none;
 
     border-radius: 9px;
-
-    background: #704116;
-
-    color: #f8e5bd;
 
     font-family: inherit;
 
@@ -166,6 +323,44 @@ button {
     font-weight: bold;
 
     cursor: pointer;
+
+    transition:
+        transform 0.18s,
+        filter 0.18s,
+        opacity 0.18s;
+}
+
+
+button:hover:not(:disabled) {
+
+    transform:
+        translateY(-1px);
+
+    filter:
+        brightness(1.08);
+}
+
+
+button:active:not(:disabled) {
+
+    transform:
+        translateY(0);
+}
+
+
+button:disabled {
+
+    cursor: not-allowed;
+
+    opacity: 0.58;
+
+    transform: none;
+}
+
+
+.scan-button {
+
+    margin-top: 8px;
 }
 
 
@@ -173,7 +368,13 @@ button {
 
     margin-top: 15px;
 
-    background: transparent;
+    background:
+        rgba(
+            255,
+            248,
+            225,
+            0.35
+        );
 
     color: #57351a;
 
@@ -182,45 +383,673 @@ button {
 }
 
 
-#qr-reader {
+/* =========================================================
+   QR SCANNER
+========================================================= */
 
-    width: 100%;
+.scanner-help {
 
-    overflow: hidden;
+    margin:
+        -10px 0 20px;
 
-    border-radius: 12px;
+    color: #684623;
 
-    background: black;
-
-    margin-bottom: 18px;
-}
-
-
-#scannerStatus {
-
-    margin-bottom: 16px;
+    font-size: 14px;
 
     line-height: 1.6;
 }
 
 
+#qr-reader,
+.qr-reader {
+
+    width: 100%;
+
+    margin-bottom: 18px;
+
+    overflow: hidden;
+
+    background: #000;
+
+    border:
+        3px solid #674018;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 10px 24px
+        rgba(0, 0, 0, 0.25);
+}
+
+
+#qr-reader video {
+
+    width: 100% !important;
+
+    border-radius: 7px;
+}
+
+
+#scannerStatus,
+.scanner-status {
+
+    margin-bottom: 16px;
+
+    color: #57351a;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   RESULT SCREEN
+========================================================= */
+
 .result-icon {
 
-    font-size: 55px;
+    margin-bottom: 10px;
 
     color: #32722f;
 
-    margin-bottom: 10px;
+    font-size: 55px;
+
+    font-weight: bold;
 }
 
 
 .result-message {
 
+    margin-bottom: 10px;
+
+    color: #58391d;
+
     line-height: 1.7;
 }
 
 
+.result-clue-area {
+
+    margin-top: 25px;
+
+    padding-top: 22px;
+
+    border-top:
+        1px solid
+        rgba(110, 69, 28, 0.3);
+}
+
+
+/* =========================================================
+   HINT / ANSWER AREA
+========================================================= */
+
+.assistance-mount {
+
+    margin-top: 20px;
+
+    text-align: left;
+}
+
+
+.assistance-card {
+
+    margin-top: 16px;
+
+    padding: 18px;
+
+    border-radius: 11px;
+
+    box-shadow:
+        0 6px 18px
+        rgba(77, 45, 17, 0.08);
+}
+
+
+/* =========================================================
+   HINT
+========================================================= */
+
+.hint-card {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 246, 192, 0.72),
+            rgba(238, 211, 135, 0.72)
+        );
+
+    border:
+        1px solid
+        rgba(155, 106, 50, 0.5);
+}
+
+
+/* =========================================================
+   ANSWER
+========================================================= */
+
+.answer-card {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(222, 232, 212, 0.78),
+            rgba(192, 209, 175, 0.78)
+        );
+
+    border:
+        1px solid
+        rgba(71, 105, 65, 0.5);
+}
+
+
+/* =========================================================
+   ASSISTANCE HEADER
+========================================================= */
+
+.assistance-heading {
+
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+}
+
+
+.assistance-heading > div {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.assistance-heading strong {
+
+    color: #4c2e13;
+
+    font-size: 17px;
+}
+
+
+.assistance-icon {
+
+    font-size: 20px;
+}
+
+
+.assistance-badge {
+
+    padding: 5px 8px;
+
+    background:
+        rgba(
+            112,
+            65,
+            22,
+            0.1
+        );
+
+    color: #80551f;
+
+    border:
+        1px solid
+        rgba(
+            112,
+            65,
+            22,
+            0.18
+        );
+
+    border-radius: 20px;
+
+    font-size: 9px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
+}
+
+
+.answer-badge {
+
+    background:
+        rgba(
+            54,
+            94,
+            51,
+            0.1
+        );
+
+    color: #496743;
+
+    border-color:
+        rgba(
+            54,
+            94,
+            51,
+            0.2
+        );
+}
+
+
+/* =========================================================
+   ASSISTANCE DESCRIPTION
+========================================================= */
+
+.assistance-description {
+
+    margin-bottom: 14px;
+
+    color: #654521;
+
+    font-size: 14px;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   HINT / ANSWER BUTTONS
+========================================================= */
+
+.assistance-button {
+
+    padding: 13px 14px;
+
+    font-size: 15px;
+}
+
+
+.hint-button {
+
+    background:
+        linear-gradient(
+            135deg,
+            #866126,
+            #674416
+        );
+
+    color: #fff0c5;
+}
+
+
+.answer-button {
+
+    background:
+        linear-gradient(
+            135deg,
+            #44613e,
+            #304a2c
+        );
+
+    color: #f3f7ed;
+}
+
+
+.assistance-button:disabled {
+
+    background:
+        linear-gradient(
+            135deg,
+            #927b5e,
+            #7b684e
+        );
+
+    color:
+        rgba(
+            255,
+            247,
+            223,
+            0.75
+        );
+
+    border:
+        1px solid
+        rgba(
+            75,
+            46,
+            20,
+            0.18
+        );
+
+    opacity: 1;
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+.assistance-countdown {
+
+    margin-top: 9px;
+
+    padding: 8px 10px;
+
+    color: #815d32;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.18
+        );
+
+    border-radius: 6px;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    letter-spacing: 0.4px;
+
+    text-align: center;
+}
+
+
+.assistance-countdown.ready {
+
+    color: #2f6b31;
+
+    background:
+        rgba(
+            46,
+            125,
+            50,
+            0.1
+        );
+}
+
+
+/* =========================================================
+   REVEALED HINT / ANSWER
+========================================================= */
+
+.revealed-assistance {
+
+    padding: 16px;
+
+    border-radius: 8px;
+}
+
+
+.revealed-assistance small {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    letter-spacing: 1.5px;
+}
+
+
+.revealed-assistance p {
+
+    color: #3c2815;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+}
+
+
+.hint-revealed {
+
+    background:
+        rgba(
+            255,
+            248,
+            201,
+            0.64
+        );
+
+    border-left:
+        4px solid #b28331;
+}
+
+
+.hint-revealed small {
+
+    color: #93691e;
+}
+
+
+.answer-revealed {
+
+    background:
+        rgba(
+            230,
+            241,
+            218,
+            0.72
+        );
+
+    border-left:
+        4px solid #55784e;
+}
+
+
+.answer-revealed small {
+
+    color: #4a6a45;
+}
+
+
+/* =========================================================
+   ASSISTANCE STATUS
+========================================================= */
+
+.assistance-status {
+
+    min-height: 18px;
+
+    margin-top: 10px;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+
+.assistance-status.error {
+
+    color: #9b2f25;
+}
+
+
+.assistance-status.success {
+
+    color: #326432;
+}
+
+
+/* =========================================================
+   HIDDEN
+========================================================= */
+
 .hidden {
 
     display: none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .hunt-page {
+
+        padding:
+            15px 12px 25px;
+    }
+
+
+    .hunt-header {
+
+        align-items:
+            flex-start;
+    }
+
+
+    .hunt-header h2 {
+
+        font-size: 20px;
+    }
+
+
+    .checkpoint-pill {
+
+        padding:
+            8px 11px;
+
+        font-size: 11px;
+    }
+
+
+    .hunt-card {
+
+        padding:
+            25px 18px;
+    }
+
+
+    .hunt-card h1 {
+
+        font-size: 26px;
+    }
+
+
+    .clue-box {
+
+        padding: 18px;
+
+        font-size: 17px;
+
+        line-height: 1.7;
+    }
+
+
+    .hunt-clue-image {
+
+        max-height: 300px;
+    }
+
+
+    .assistance-card {
+
+        padding: 15px;
+    }
+
+
+    .assistance-heading {
+
+        align-items:
+            flex-start;
+    }
+
+
+    .assistance-badge {
+
+        font-size: 8px;
+    }
+
+
+    button {
+
+        font-size: 16px;
+    }
+
+}
+
+
+@media (max-width: 400px) {
+
+    .hunt-header {
+
+        gap: 8px;
+    }
+
+
+    .hunt-header h2 {
+
+        font-size: 18px;
+    }
+
+
+    .checkpoint-pill {
+
+        max-width: 120px;
+
+        text-align: center;
+    }
+
+
+    .hunt-card {
+
+        padding:
+            22px 14px;
+    }
+
+
+    .hunt-card h1 {
+
+        font-size: 23px;
+    }
+
+
+    .clue-box {
+
+        padding: 16px;
+
+        font-size: 16px;
+    }
+
+
+    .assistance-heading {
+
+        flex-direction: column;
+    }
+
+
+    .assistance-badge {
+
+        align-self:
+            flex-start;
+    }
+
 }

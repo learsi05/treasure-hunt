@@ -17,121 +17,223 @@ const supabase =
     );
 
 
-function getCookie(req, name) {
+/* =========================================================
+   COOKIE
+========================================================= */
+
+function getCookie(
+    req,
+    name
+) {
 
     const cookieHeader =
         req.headers.cookie || "";
 
+
     const cookies =
         cookieHeader.split(";");
 
-    for (const cookie of cookies) {
 
-        const [key, ...valueParts] =
-            cookie.trim().split("=");
+    for (
+        const cookie
+        of cookies
+    ) {
 
-        if (key === name) {
+        const [
+            key,
+            ...valueParts
+        ] =
+            cookie
+                .trim()
+                .split("=");
 
-            return decodeURIComponent(
-                valueParts.join("=")
-            );
+
+        if (
+            key === name
+        ) {
+
+            const value =
+                valueParts.join("=");
+
+
+            try {
+
+                return decodeURIComponent(
+                    value
+                );
+
+            } catch (error) {
+
+                return value;
+            }
         }
     }
+
 
     return null;
 }
 
 
-function hashToken(token) {
+/* =========================================================
+   TOKEN HASH
+========================================================= */
+
+function hashToken(
+    token
+) {
 
     return crypto
-        .createHash("sha256")
-        .update(token)
-        .digest("hex");
+        .createHash(
+            "sha256"
+        )
+        .update(
+            token
+        )
+        .digest(
+            "hex"
+        );
 }
 
 
-module.exports =
-async function handler(req, res) {
+/* =========================================================
+   MAIN HANDLER
+========================================================= */
 
-    if (req.method !== "POST") {
+module.exports =
+async function handler(
+    req,
+    res
+) {
+
+    /* =====================================================
+       METHOD
+    ===================================================== */
+
+    if (
+        req.method !==
+        "POST"
+    ) {
 
         return res
             .status(405)
             .json({
-                success: false,
+
+                success:
+                    false,
+
                 message:
-                    "Method not allowed"
+                    "Method not allowed."
+
             });
     }
 
+
+    res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate"
+    );
+
+
+    /* =====================================================
+       INPUT
+    ===================================================== */
 
     const {
         teamName,
         loginCode
-    } = req.body || {};
-
-
-    if (!teamName || !loginCode) {
-
-        return res
-            .status(400)
-            .json({
-                success: false,
-                message:
-                    "Enter team name and login code."
-            });
-    }
+    } =
+        req.body || {};
 
 
     const cleanTeamName =
-        teamName.trim();
+        String(
+            teamName ||
+            ""
+        )
+            .trim();
+
 
     const cleanLoginCode =
-        loginCode
+        String(
+            loginCode ||
+            ""
+        )
             .trim()
             .toUpperCase();
 
 
-    // Find team using both
-    // team name and login code.
+    if (
+        !cleanTeamName ||
+        !cleanLoginCode
+    ) {
+
+        return res
+            .status(400)
+            .json({
+
+                success:
+                    false,
+
+                message:
+                    "Enter team name and login code."
+
+            });
+    }
+
+
+    /* =====================================================
+       FIND TEAM
+    ===================================================== */
 
     const {
         data: team,
-        error
-    } = await supabase
-        .from("teams")
-        .select(`
-            id,
-            team_name,
-            login_code,
-            active_session_token,
-            current_checkpoint
-        `)
-        .ilike(
-            "team_name",
-            cleanTeamName
-        )
-        .eq(
-            "login_code",
-            cleanLoginCode
-        )
-        .maybeSingle();
+        error: teamError
+    } =
+        await supabase
+            .from(
+                "teams"
+            )
+            .select(`
+                id,
+                team_name,
+                login_code,
+                active_session_token,
+                current_checkpoint,
+                camera_ready,
+                ready_at,
+                finished_at
+            `)
+            .ilike(
+                "team_name",
+                cleanTeamName
+            )
+            .eq(
+                "login_code",
+                cleanLoginCode
+            )
+            .maybeSingle();
 
 
-    if (error) {
+    if (
+        teamError
+    ) {
 
         console.error(
             "TEAM LOGIN ERROR:",
-            error
+            teamError
         );
+
 
         return res
             .status(500)
             .json({
-                success: false,
+
+                success:
+                    false,
+
                 message:
                     "Could not verify team."
+
             });
     }
 
@@ -141,17 +243,20 @@ async function handler(req, res) {
         return res
             .status(401)
             .json({
-                success: false,
+
+                success:
+                    false,
+
                 message:
                     "Incorrect team name or login code."
+
             });
     }
 
 
-    // ---------------------------------
-    // Check whether this browser
-    // already owns the active session.
-    // ---------------------------------
+    /* =====================================================
+       CHECK EXISTING BROWSER SESSION
+    ===================================================== */
 
     const existingCookie =
         getCookie(
@@ -171,6 +276,11 @@ async function handler(req, res) {
             );
 
 
+        /*
+         * Same browser already owns
+         * the active session.
+         */
+
         if (
             existingHash ===
             team.active_session_token
@@ -179,10 +289,19 @@ async function handler(req, res) {
             return res
                 .status(200)
                 .json({
-                    success: true,
+
+                    success:
+                        true,
+
+                    restored:
+                        true,
+
                     message:
                         "Session restored.",
+
+
                     team: {
+
                         id:
                             team.id,
 
@@ -190,109 +309,248 @@ async function handler(req, res) {
                             team.team_name,
 
                         currentCheckpoint:
-                            team.current_checkpoint
+                            Number(
+                                team.current_checkpoint
+                            ),
+
+                        cameraReady:
+                            Boolean(
+                                team.camera_ready
+                            ),
+
+                        finished:
+                            Boolean(
+                                team.finished_at
+                            ),
+
+                        finishedAt:
+                            team.finished_at ||
+                            null
+
                     }
+
                 });
         }
     }
 
 
-    // ---------------------------------
-    // Another browser already owns
-    // this team's active session.
-    // ---------------------------------
+    /* =====================================================
+       ANOTHER DEVICE ALREADY OWNS SESSION
+    ===================================================== */
 
-    if (team.active_session_token) {
+    if (
+        team.active_session_token
+    ) {
 
         return res
             .status(409)
             .json({
-                success: false,
+
+                success:
+                    false,
+
                 code:
                     "TEAM_ALREADY_ACTIVE",
 
                 message:
-                    "This team is already logged in on another device."
+                    "This team is already logged in on another device. Ask the administrator to reset the team's login session if required."
+
             });
     }
 
 
-    // ---------------------------------
-    // Create new secure session
-    // ---------------------------------
+    /* =====================================================
+       CREATE SECURE SESSION
+    ===================================================== */
 
     const rawToken =
         crypto
-            .randomBytes(32)
-            .toString("hex");
+            .randomBytes(
+                32
+            )
+            .toString(
+                "hex"
+            );
 
 
     const tokenHash =
-        hashToken(rawToken);
-
-
-    const {
-        error: updateError
-    } = await supabase
-        .from("teams")
-        .update({
-            active_session_token:
-                tokenHash,
-
-            login_time:
-                new Date()
-                    .toISOString()
-        })
-        .eq(
-            "id",
-            team.id
+        hashToken(
+            rawToken
         );
 
 
-    if (updateError) {
+    const loginTime =
+        new Date()
+            .toISOString();
+
+
+    /*
+     * IMPORTANT:
+     *
+     * Only claim this team if
+     * active_session_token is STILL null.
+     *
+     * This prevents two devices logging
+     * into the same team simultaneously.
+     */
+
+    const {
+        data: claimedTeam,
+        error: updateError
+    } =
+        await supabase
+            .from(
+                "teams"
+            )
+            .update({
+
+                active_session_token:
+                    tokenHash,
+
+                login_time:
+                    loginTime
+
+            })
+            .eq(
+                "id",
+                team.id
+            )
+            .is(
+                "active_session_token",
+                null
+            )
+            .select(`
+                id,
+                team_name,
+                current_checkpoint,
+                camera_ready,
+                ready_at,
+                finished_at
+            `)
+            .maybeSingle();
+
+
+    if (
+        updateError
+    ) {
 
         console.error(
             "SESSION CREATE ERROR:",
             updateError
         );
 
+
         return res
             .status(500)
             .json({
-                success: false,
+
+                success:
+                    false,
+
                 message:
                     "Could not create team session."
+
             });
     }
 
 
-    // HttpOnly means JavaScript running
-    // in the browser cannot read it.
+    /* =====================================================
+       ANOTHER LOGIN WON THE RACE
+    ===================================================== */
+
+    if (!claimedTeam) {
+
+        return res
+            .status(409)
+            .json({
+
+                success:
+                    false,
+
+                code:
+                    "TEAM_ALREADY_ACTIVE",
+
+                message:
+                    "This team has just been logged in on another device. Ask the administrator to reset the login session if necessary."
+
+            });
+    }
+
+
+    /* =====================================================
+       SESSION COOKIE
+    ===================================================== */
+
+    /*
+     * HttpOnly:
+     * JavaScript cannot read the token.
+     *
+     * Secure:
+     * Sent only over HTTPS.
+     *
+     * SameSite=Strict:
+     * Helps protect against cross-site
+     * request attacks.
+     *
+     * Max-Age=43200:
+     * 12 hours.
+     */
 
     res.setHeader(
         "Set-Cookie",
 
-        `treasure_session=${encodeURIComponent(rawToken)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`
+        `treasure_session=${encodeURIComponent(
+            rawToken
+        )}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`
     );
 
+
+    /* =====================================================
+       SUCCESS
+    ===================================================== */
 
     return res
         .status(200)
         .json({
-            success: true,
+
+            success:
+                true,
+
+            restored:
+                false,
 
             message:
                 "Login successful.",
 
+
             team: {
+
                 id:
-                    team.id,
+                    claimedTeam.id,
 
                 name:
-                    team.team_name,
+                    claimedTeam.team_name,
 
                 currentCheckpoint:
-                    team.current_checkpoint
+                    Number(
+                        claimedTeam.current_checkpoint
+                    ),
+
+                cameraReady:
+                    Boolean(
+                        claimedTeam.camera_ready
+                    ),
+
+                finished:
+                    Boolean(
+                        claimedTeam.finished_at
+                    ),
+
+                finishedAt:
+                    claimedTeam.finished_at ||
+                    null
+
             }
+
         });
 };
