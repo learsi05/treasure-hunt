@@ -71,7 +71,9 @@ function adminToken() {
         .update(
             "treasure-hunt-admin"
         )
-        .digest("hex");
+        .digest(
+            "hex"
+        );
 }
 
 
@@ -91,6 +93,52 @@ function authorized(
 
 
 /* =========================================================
+   EVENT STATUS
+========================================================= */
+
+async function getEventStatus() {
+
+    const {
+        data,
+        error
+    } =
+        await supabase
+            .from(
+                "event_config"
+            )
+            .select(
+                "status"
+            )
+            .eq(
+                "id",
+                1
+            )
+            .maybeSingle();
+
+
+    if (
+        error ||
+        !data
+    ) {
+
+        return {
+            error:
+                error ||
+                new Error(
+                    "Event configuration not found."
+                )
+        };
+    }
+
+
+    return {
+        status:
+            data.status
+    };
+}
+
+
+/* =========================================================
    MAIN HANDLER
 ========================================================= */
 
@@ -100,14 +148,8 @@ async function handler(
     res
 ) {
 
-    /* =====================================================
-       ADMIN SESSION
-    ===================================================== */
-
     if (
-        !authorized(
-            req
-        )
+        !authorized(req)
     ) {
 
         return res
@@ -131,7 +173,7 @@ async function handler(
 
 
     /* =====================================================
-       GET FINAL QR
+       GET TEAMS
     ===================================================== */
 
     if (
@@ -145,17 +187,23 @@ async function handler(
         } =
             await supabase
                 .from(
-                    "event_config"
+                    "teams"
                 )
                 .select(`
-                    status,
-                    final_qr_code
+                    id,
+                    team_name,
+                    login_code,
+                    current_checkpoint,
+                    active_session_token,
+                    login_time,
+                    camera_ready,
+                    ready_at,
+                    route_ready,
+                    finished_at
                 `)
-                .eq(
-                    "id",
-                    1
-                )
-                .maybeSingle();
+                .order(
+                    "id"
+                );
 
 
         if (
@@ -163,7 +211,7 @@ async function handler(
         ) {
 
             console.error(
-                "LOAD FINAL QR ERROR:",
+                "LOAD TEAMS ERROR:",
                 error
             );
 
@@ -176,23 +224,7 @@ async function handler(
                         false,
 
                     message:
-                        "Could not load the final QR configuration."
-
-                });
-        }
-
-
-        if (!data) {
-
-            return res
-                .status(500)
-                .json({
-
-                    success:
-                        false,
-
-                    message:
-                        "Event configuration was not found."
+                        "Could not load teams."
 
                 });
         }
@@ -205,19 +237,15 @@ async function handler(
                 success:
                     true,
 
-                eventStatus:
-                    data.status,
-
-                finalQrCode:
-                    data.final_qr_code ||
-                    null
+                teams:
+                    data || []
 
             });
     }
 
 
     /* =====================================================
-       SAVE / UPDATE FINAL QR
+       CREATE TEAM
     ===================================================== */
 
     if (
@@ -225,36 +253,17 @@ async function handler(
         "POST"
     ) {
 
-        /* -------------------------------------------------
-           EVENT MUST BE WAITING
-        ------------------------------------------------- */
-
-        const {
-            data: event,
-            error: eventError
-        } =
-            await supabase
-                .from(
-                    "event_config"
-                )
-                .select(`
-                    status,
-                    final_qr_code
-                `)
-                .eq(
-                    "id",
-                    1
-                )
-                .maybeSingle();
+        const eventState =
+            await getEventStatus();
 
 
         if (
-            eventError
+            eventState.error
         ) {
 
             console.error(
-                "FINAL QR EVENT CHECK ERROR:",
-                eventError
+                "CREATE TEAM EVENT CHECK ERROR:",
+                eventState.error
             );
 
 
@@ -272,24 +281,8 @@ async function handler(
         }
 
 
-        if (!event) {
-
-            return res
-                .status(500)
-                .json({
-
-                    success:
-                        false,
-
-                    message:
-                        "Event configuration was not found."
-
-                });
-        }
-
-
         if (
-            event.status !==
+            eventState.status !==
             "waiting"
         ) {
 
@@ -301,31 +294,40 @@ async function handler(
                         false,
 
                     message:
-                        "The final QR can only be changed while the event is waiting. Reset the event first."
+                        "Teams can only be added while the event is waiting."
 
                 });
         }
 
 
-        /* -------------------------------------------------
-           QR VALUE
-        ------------------------------------------------- */
-
         const {
-            finalQrCode
+            teamName,
+            loginCode
         } =
             req.body || {};
 
 
-        const cleanCode =
+        const cleanTeamName =
             String(
-                finalQrCode ||
+                teamName ||
                 ""
             )
                 .trim();
 
 
-        if (!cleanCode) {
+        const cleanLoginCode =
+            String(
+                loginCode ||
+                ""
+            )
+                .trim()
+                .toUpperCase();
+
+
+        if (
+            !cleanTeamName ||
+            !cleanLoginCode
+        ) {
 
             return res
                 .status(400)
@@ -335,43 +337,275 @@ async function handler(
                         false,
 
                     message:
-                        "Final QR value is required."
+                        "Enter both team name and login code."
 
                 });
         }
 
 
-        /* =================================================
-           MAKE SURE FINAL QR IS NOT USED BY ANY TEAM ROUTE
-        ================================================= */
-
         const {
-            data: existingRoute,
-            error: routeCheckError
+            count,
+            error: countError
         } =
             await supabase
                 .from(
-                    "team_routes"
+                    "teams"
                 )
-                .select(`
-                    id,
-                    team_id,
-                    checkpoint_number
-                `)
+                .select(
+                    "*",
+                    {
+                        count:
+                            "exact",
+
+                        head:
+                            true
+                    }
+                );
+
+
+        if (
+            countError
+        ) {
+
+            console.error(
+                "TEAM COUNT ERROR:",
+                countError
+            );
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Could not verify team slots."
+
+                });
+        }
+
+
+        if (
+            Number(count) >= 4
+        ) {
+
+            return res
+                .status(400)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "All four team slots are already registered."
+
+                });
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await supabase
+                .from(
+                    "teams"
+                )
+                .insert([
+                    {
+
+                        team_name:
+                            cleanTeamName,
+
+                        login_code:
+                            cleanLoginCode,
+
+                        current_checkpoint:
+                            1,
+
+                        camera_ready:
+                            false,
+
+                        route_ready:
+                            false
+
+                    }
+                ])
+                .select()
+                .single();
+
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "CREATE TEAM ERROR:",
+                error
+            );
+
+
+            if (
+                error.code ===
+                "23505"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "That team name or login code is already in use."
+
+                    });
+            }
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Could not register team."
+
+                });
+        }
+
+
+        return res
+            .status(201)
+            .json({
+
+                success:
+                    true,
+
+                team:
+                    data
+
+            });
+    }
+
+
+    /* =====================================================
+       DELETE TEAM
+    ===================================================== */
+
+    if (
+        req.method ===
+        "DELETE"
+    ) {
+
+        const eventState =
+            await getEventStatus();
+
+
+        if (
+            eventState.error
+        ) {
+
+            console.error(
+                "DELETE TEAM EVENT CHECK ERROR:",
+                eventState.error
+            );
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Could not verify event status."
+
+                });
+        }
+
+
+        if (
+            eventState.status !==
+            "waiting"
+        ) {
+
+            return res
+                .status(409)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Teams can only be deleted while the event is waiting."
+
+                });
+        }
+
+
+        const {
+            teamId
+        } =
+            req.body || {};
+
+
+        const id =
+            Number(
+                teamId
+            );
+
+
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
+
+            return res
+                .status(400)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Invalid team."
+
+                });
+        }
+
+
+        const {
+            data: existingTeam,
+            error: lookupError
+        } =
+            await supabase
+                .from(
+                    "teams"
+                )
+                .select(
+                    "id, team_name"
+                )
                 .eq(
-                    "qr_code",
-                    cleanCode
+                    "id",
+                    id
                 )
                 .maybeSingle();
 
 
         if (
-            routeCheckError
+            lookupError
         ) {
 
             console.error(
-                "FINAL QR DUPLICATE CHECK ERROR:",
-                routeCheckError
+                "DELETE TEAM LOOKUP ERROR:",
+                lookupError
             );
 
 
@@ -383,60 +617,51 @@ async function handler(
                         false,
 
                     message:
-                        "Could not verify whether this QR is already in use."
+                        "Could not verify team."
 
                 });
         }
 
 
         if (
-            existingRoute
+            !existingTeam
         ) {
 
             return res
-                .status(400)
+                .status(404)
                 .json({
 
                     success:
                         false,
 
                     message:
-                        "This QR is already assigned to one of the team checkpoints. Use a different QR for the common final checkpoint."
+                        "Team was not found."
 
                 });
         }
 
 
-        /* =================================================
-           SAVE FINAL QR
-        ================================================= */
-
         const {
-            error: updateError
+            error
         } =
             await supabase
                 .from(
-                    "event_config"
+                    "teams"
                 )
-                .update({
-
-                    final_qr_code:
-                        cleanCode
-
-                })
+                .delete()
                 .eq(
                     "id",
-                    1
+                    id
                 );
 
 
         if (
-            updateError
+            error
         ) {
 
             console.error(
-                "SAVE FINAL QR ERROR:",
-                updateError
+                "DELETE TEAM ERROR:",
+                error
             );
 
 
@@ -448,7 +673,7 @@ async function handler(
                         false,
 
                     message:
-                        "Could not save the final QR."
+                        "Could not delete team."
 
                 });
         }
@@ -461,11 +686,137 @@ async function handler(
                 success:
                     true,
 
-                finalQrCode:
-                    cleanCode,
+                message:
+                    `${existingTeam.team_name} deleted.`
+
+            });
+    }
+
+
+    /* =====================================================
+       RESET LOGIN SESSION
+    ===================================================== */
+
+    if (
+        req.method ===
+        "PATCH"
+    ) {
+
+        const {
+            teamId
+        } =
+            req.body || {};
+
+
+        const id =
+            Number(
+                teamId
+            );
+
+
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
+
+            return res
+                .status(400)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Invalid team."
+
+                });
+        }
+
+
+        const {
+            data: updatedTeam,
+            error
+        } =
+            await supabase
+                .from(
+                    "teams"
+                )
+                .update({
+
+                    active_session_token:
+                        null,
+
+                    login_time:
+                        null,
+
+                    camera_ready:
+                        false,
+
+                    ready_at:
+                        null
+
+                })
+                .eq(
+                    "id",
+                    id
+                )
+                .select(
+                    "id"
+                )
+                .maybeSingle();
+
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "RESET TEAM SESSION ERROR:",
+                error
+            );
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Could not reset team login session."
+
+                });
+        }
+
+
+        if (
+            !updatedTeam
+        ) {
+
+            return res
+                .status(404)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Team was not found."
+
+                });
+        }
+
+
+        return res
+            .status(200)
+            .json({
+
+                success:
+                    true,
 
                 message:
-                    "Common Checkpoint 5 QR saved successfully."
+                    "Team login session reset. Progress was preserved."
 
             });
     }
